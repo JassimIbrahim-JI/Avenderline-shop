@@ -6,7 +6,7 @@
 A sophisticated e-commerce platform specializing in traditional Qatari abayas, built with ASP.NET MVC and modern web technologies. Designed to showcase cultural elegance while providing a seamless shopping experience.
 
 **Video Demo**  
-[![Demo Video](./media/video-preview.jpg)](./media/demo.mp4)
+[![Demo Video](./media/video-preview.jpg)](https://drive.google.com/file/d/1d-GRqKu6O5isv5qzY6csyF522g6HUfH3/view?usp=sharing)
 
 ## Key Features
 - **Cultural Authentication**  
