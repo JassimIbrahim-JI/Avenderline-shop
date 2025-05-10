@@ -1,0 +1,312 @@
+﻿@using LavenderLine.Enums.Payment
+@using LavenderLine.ViewModels.Orders
+@model PaymentListViewModel
+
+@{
+    ViewData["Title"] = "Payments";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <!-- Filter Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light py-3">
+            <h5 class="m-0 font-weight-bold text-primary">Filters</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3 align-items-end">
+                <input type="hidden" name="sortBy" value="@Model.CurrentSort" />
+                <input type="hidden" name="sortDirection" value="@Model.CurrentDirection" />
+
+                <div class="col-md-3">
+                    <label class="form-label">User ID</label>
+                    <input type="text" class="form-control"
+                           name="userId"
+                           value="@Model.Filters.UserId"
+                           placeholder="Enter user ID">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" class="form-control"
+                           name="startDate"
+                           value="@(Model.Filters.StartDate?.InZone(QatarDateTime.QatarZone)
+        .LocalDateTime
+        .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) )">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">End Date</label>
+                    <input type="date" class="form-control"
+                           name="endDate"
+                           value="@(Model.Filters.EndDate?.InZone(QatarDateTime.QatarZone)
+        .LocalDateTime
+        .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) )">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" name="status">
+                        <option value="">All Statuses</option>
+                        @foreach (PaymentStatus status in Enum.GetValues(typeof(PaymentStatus)))
+                        {
+                            <option value="@status"
+                                    selected="@(Model.Filters.Status == status)">
+                                @status
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="fas fa-sync"></i> Clear Filters
+                    </a>
+                    <a asp-action="ExportToPdfForPayments"
+                       asp-controller="Pdf"
+                       asp-all-route-data="@(new Dictionary<string, string> {
+        { "userId", Model.Filters.UserId },
+        { "startDate", Model.Filters.StartDate?.InZone(QatarDateTime.QatarZone)
+        .LocalDateTime
+        .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)  },
+        { "endDate", Model.Filters.EndDate?.InZone(QatarDateTime.QatarZone)
+        .LocalDateTime
+        .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)  },
+        { "status", Model.Filters.Status?.ToString() }
+    })"
+                       class="btn btn-danger">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="m-0 font-weight-bold">Payment Management</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>
+                                <a asp-action="Index"
+                                   asp-all-route-data="@GetSortRouteData("PaymentDate")">
+                                    Date @Html.Raw(GetSortIcon("PaymentDate"))
+                                </a>
+                            </th>
+                            <th>User</th>
+                            <th>
+                                <a asp-action="Index"
+                                   asp-all-route-data="@GetSortRouteData("Amount")">
+                                    Amount (QAR) @Html.Raw(GetSortIcon("Amount"))
+                                </a>
+                            </th>
+                            <th>Status</th>
+                            <th>Method</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var payment in Model.Payments)
+                        {
+                            <tr>
+                                <td>@payment.PaymentDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("dd MMM yyyy HH:mm", new CultureInfo("en-QA"))</td>
+                                <td>
+                                    @if (payment.User != null)
+                                    {
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle me-2"></i>
+                                            @payment.User.FullName
+                                            <small class="text-muted ms-2">@payment.User.Email</small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Guest Payment</span>
+                                    }
+                                </td>
+                                <td>@payment.Amount.ToString("N2")</td>
+                                <td>
+                                    <span class="status-badge badge @GetStatusBadge(payment.Status) rounded-pill p-2">
+                                        <i class="fas @Html.Raw(GetStatusIcon(payment.Status)) me-1"></i>
+                                        @payment.Status
+                                    </span>
+                                </td>
+                                <td>@payment.PaymentMethod</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@payment.Id"
+                                           class="btn btn-sm btn-outline-primary rounded-3"
+                                           data-bs-toggle="tooltip" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if (payment.Status == PaymentStatus.Pending && payment.PaymentMethod == "Cash")
+                                        {
+                                            <form asp-action="ConfirmCashPayment" method="post" class="d-inline">
+                                                <input type="hidden" name="paymentId" value="@payment.Id" />
+                                                <button type="submit" class="btn btn-sm btn-success rounded-3"
+                                                        data-bs-toggle="tooltip" title="Confirm Cash Payment">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (payment.Status == PaymentStatus.Completed && payment.PaymentMethod == "Card")
+                                        {
+                                            <form asp-action="RefundCardPayment" method="post" class="d-inline">
+                                                <input type="hidden" name="paymentId" value="@payment.Id" />
+                                                <button type="submit" class="btn btn-sm btn-warning rounded-3"
+                                                        data-bs-toggle="tooltip" title="Initiate Refund">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@i"
+                               asp-all-route-data="@GetPaginationRouteData(i)">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+
+            // Toast notifications
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const error = urlParams.get('error');
+            if (success) Toast.show('success', success);
+            if (error) Toast.show('danger', error);
+
+            // AJAX form handling
+            $('form[class^="ajax-"]').submit(function (e) {
+                e.preventDefault();
+                const form = $(this);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    method: 'POST',
+                    data: form.serialize(),
+                    beforeSend: function () {
+                        form.find('button').prop('disabled', true);
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            Toast.show('success', response.message);
+                            if (response.newStatus) {
+                                const badge = form.closest('tr').find('.status-badge');
+                                badge.removeClass().addClass(`status-badge badge ${response.newStatusClass} rounded-pill p-2`)
+                                    .html(`<i class="fas ${response.icon} me-1"></i> ${response.newStatus}`);
+                            }
+                        } else {
+                            Toast.show('danger', response.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        Toast.show('danger', xhr.statusText);
+                    },
+                    complete: function () {
+                        form.find('button').prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+@functions {
+    Dictionary<string, string> GetSortRouteData(string sortBy)
+    {
+        return new Dictionary<string, string> {
+            { "sortBy", sortBy },
+            { "sortDirection", Model.CurrentSort == sortBy && Model.CurrentDirection == "asc" ? "desc" : "asc" },
+            { "userId", Model.Filters.UserId },
+            { "startDate", Model.Filters.StartDate?.InZone(QatarDateTime.QatarZone)
+        .LocalDateTime
+        .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)  },
+            { "endDate", Model.Filters.EndDate?.InZone(QatarDateTime.QatarZone)
+        .LocalDateTime
+        .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)  },
+            { "status", Model.Filters.Status?.ToString() }
+        };
+    }
+
+    Dictionary<string, string> GetPaginationRouteData(int page)
+    {
+        return new Dictionary<string, string> {
+            { "page", page.ToString() },
+            { "sortBy", Model.CurrentSort },
+            { "sortDirection", Model.CurrentDirection },
+            { "userId", Model.Filters.UserId },
+            { "startDate", Model.Filters.StartDate?.InZone(QatarDateTime.QatarZone)
+        .LocalDateTime
+        .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)  },
+            { "endDate", Model.Filters.EndDate?.InZone(QatarDateTime.QatarZone)
+        .LocalDateTime
+        .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)  },
+            { "status", Model.Filters.Status?.ToString() }
+        };
+    }
+
+    string GetSortIcon(string columnName)
+    {
+        if (Model.CurrentSort != columnName) return "";
+        return Model.CurrentDirection == "asc"
+            ? "<i class='fas fa-sort-up'></i>"
+            : "<i class='fas fa-sort-down'></i>";
+    }
+
+    string GetStatusIcon(PaymentStatus status)
+    {
+        return status switch
+        {
+            PaymentStatus.Pending => "fa-clock",
+            PaymentStatus.Completed => "fa-check-circle",
+            PaymentStatus.Refunded => "fa-undo",
+            PaymentStatus.Failed => "fa-times-circle",
+            _ => "fa-question-circle"
+        };
+    }
+
+    string GetStatusBadge(PaymentStatus status)
+    {
+        return status switch
+        {
+            PaymentStatus.Pending => "bg-warning text-dark",
+            PaymentStatus.Completed => "bg-success text-white",
+            PaymentStatus.Refunded => "bg-info text-white",
+            PaymentStatus.Failed => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+    }
+}

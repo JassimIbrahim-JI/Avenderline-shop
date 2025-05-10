@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <style>
+        body, td {
+            font-family: Roboto, Arial, Helvetica, sans-serif !important;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        @media screen and (max-width: 480px) {
+            img.logo {
+                width: 100px !important; 
+            }
+        }
+    </style>
+
+    <title>Order Confirmation #{OrderId}</title>
+</head>
+<body>
+    <!--[if mso]>
+    <style type="text/css">
+    body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
+    </style>
+    <![endif]-->
+    <!-- Outlook Background Wrapper -->
+    <center style="width: 100%; background: #f5f5f5;">
+        <!--[if gte mso 9]>
+        <v:background xmlns:v="urn:schemas-microsoft-com:vml" fill="t">
+            <v:fill type="tile" color="#f5f5f5"/>
+        </v:background>
+        <![endif]-->
+
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="background:#ffffff; border-collapse:collapse;">
+            <!-- Header -->
+            <tr>
+                <td align="center" style="padding: 20px 0; background-color: #ffffff;">
+                    <!--[if mso]>
+    <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:600px;height:80px;">
+        <v:fill type="tile" color="#ffffff" />
+        <v:textbox inset="0,0,0,0">
+    <![endif]-->
+                    <a href="#" style="text-decoration: none;">
+                        <img src="{logoUrl}"
+                             alt="AvenderLine"
+                             width="120"
+                             style="display: block; max-width: 100%; height: auto; border: 0;">
+                    </a>
+                    <!--[if mso]>
+        </v:textbox>
+    </v:rect>
+    <![endif]-->
+                </td>
+            </tr>
+
+            <!-- Content -->
+            <tr>
+                <td style="padding:40px 30px; font-family:Georgia, 'Times New Roman', Times, serif; color:#333;">
+                    <h1 style="font-size:24px; margin:0 0 20px; color: #2d2d2d;">Order Confirmation #{OrderId}</h1>
+                    <p style="font-size:16px; line-height:1.5; margin:0 0 20px;">
+                        Dear {CustomerName},<br><br>
+                        Thank you for your order. Your order <strong>#{OrderId}</strong> has been successfully placed.
+                    </p>
+
+                    <h3 style="font-size:20px; margin:0 0 15px; color: #2d2d2d;">Order Details</h3>
+                    <p style="font-size:16px; line-height:1.5; margin:0 0 10px;">
+                        <strong>Order Date:</strong> {OrderDate}
+                    </p>
+                    <p style="font-size:16px; line-height:1.5; margin:0 0 20px;">
+                        <strong>Total Amount:</strong> {TotalAmount} {Currency}
+                    </p>
+                </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+                <td style="padding:30px 20px; font-family:Arial, sans-serif; font-size:12px; color:#888; border-top:1px solid #ddd;">
+                    <p style="margin:0 0 10px;">&copy; 2024 AvenderLine. All rights reserved.</p>
+                    <p style="margin:0 0 10px;">AvenderLine, 0000 Business Avndr, Doha, Qatar</p>
+                    <p style="margin:0;">
+                        Need help? <a href="mailto:support@avenderline.com" style="color: #8A2BE2; text-decoration: none;">Contact Support</a>
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</body>
+</html>

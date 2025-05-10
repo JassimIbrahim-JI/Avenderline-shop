@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "Email Confirmation";
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml";
+}
+
+<style>
+    .card-modern {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+        .card-modern .card-header {
+            background: linear-gradient(135deg, #8A2BE2, #5a189a);
+            color: #fff;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+            .card-modern .card-header h3 {
+                margin: 0;
+                font-weight: 600;
+            }
+
+        .card-modern .card-body {
+            padding: 2rem;
+            background-color: #fff;
+        }
+
+    .alert {
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+    /* Brand Button */
+    .btn-brand {
+        background-color: #8A2BE2;
+        border-color: #8A2BE2;
+        color: #fff;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-brand:hover {
+            background-color: #6a1b9a;
+            border-color: #6a1b9a;
+            color: #fff;
+        }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card card-modern">
+                <div class="card-header">
+                    <h3>Email Confirmation</h3>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Success == true)
+                    {
+                        <div class="alert alert-success" role="alert">
+                            Your email has been confirmed successfully! You can now log in.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            There was a problem confirming your email. Please try again.
+                        </div>
+                    }
+                    <div class="text-center mt-4">
+                        <a asp-action="Login" class="btn btn-brand btn-lg">
+                            Return to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

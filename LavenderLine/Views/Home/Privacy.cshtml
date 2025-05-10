@@ -1,0 +1,233 @@
+﻿
+@{
+    ViewData["Title"] = "Privacy";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="modern-policy-container">
+    <section class="policy-header">
+        <h1 class="policy-main-title">Transparency & Trust</h1>
+        <p class="policy-subtitle">Your confidence in how we handle information is our priority</p>
+    </section>
+
+    <div class="policy-grid">
+        
+        <article class="policy-card">
+            <div class="card-illustration">
+                <img src="~/svgs/return.svg" alt="Return illustration" class="hover-scale">
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">Flexible Returns</h3>
+                <div class="card-text">
+                    <p>We believe in hassle-free shopping. Return unworn items in original condition within 30 days for a full refund or exchange.</p>
+                    <div class="policy-highlight">
+                        <i class="fas fa-clock"></i>
+                        <span>30-Day Guarantee</span>
+                    </div>
+                   @*  <a href="#" class="policy-cta">
+                        Return Process
+                        <i class="fas fa-arrow-right"></i>
+                    </a> *@
+                </div>
+            </div>
+        </article>
+
+        <!-- Privacy Policy Card (Featured) -->
+        <article class="policy-card featured">
+            <div class="card-illustration">
+                <img src="~/svgs/privacy.svg" alt="Privacy illustration" class="hover-scale">
+                <div class="privacy-badge">Your Security Matters</div>
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">Data Protection</h3>
+                <div class="card-text">
+                    <p>We implement rigorous security measures to protect your personal information. Your data is never shared without explicit consent.</p>
+                    <ul class="privacy-features">
+                        <li><i class="fas fa-shield-alt"></i>256-bit Encryption</li>
+                        <li><i class="fas fa-user-lock"></i>Strict Access Controls</li>
+                        <li><i class="fas fa-ban"></i>No Third-Party Sharing</li>
+                    </ul>
+                    <a href="#" class="policy-cta">
+                        Full Privacy Policy
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <!-- Terms of Service Card -->
+        <article class="policy-card">
+            <div class="card-illustration">
+                <img src="~/svgs/terms.svg" alt="Terms illustration" class="hover-scale">
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">Fair Terms</h3>
+                <div class="card-text">
+                    <p>Our transparent terms ensure a safe and equitable experience for all users. We clearly outline responsibilities for both parties.</p>
+                    <div class="policy-highlight">
+                        <i class="fas fa-balance-scale"></i>
+                        <span>Transparent Agreements</span>
+                    </div>
+                  @*   <a href="#" class="policy-cta">
+                        View Complete Terms
+                        <i class="fas fa-arrow-right"></i>
+                    </a> *@
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-accent: #2A5CFF;
+    --dark-text: #1A1A1A;
+    --soft-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    --gradient-background: linear-gradient(135deg, #f8f9ff 0%, #f1f4ff 100%);
+}
+
+.modern-policy-container {
+    max-width: 1400px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+}
+
+.policy-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.policy-main-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--dark-text);
+    margin-bottom: 1rem;
+    letter-spacing: -0.03em;
+}
+
+.policy-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.policy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    position: relative;
+}
+
+.policy-card {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.policy-card.featured {
+    background: var(--gradient-background);
+    border: 1px solid rgba(42, 92, 255, 0.15);
+    transform: translateY(-1rem);
+}
+
+.policy-card:hover {
+    transform: translateY(-0.5rem);
+    box-shadow: var(--soft-shadow);
+}
+
+.card-illustration {
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.card-illustration img {
+    width: 70%;
+    transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-bottom: 1rem;
+}
+
+.card-text {
+    color: #444;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+}
+
+.policy-cta {
+    display: inline-flex;
+    align-items: center;
+    color: var(--primary-accent);
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+
+.policy-cta i {
+    margin-left: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.policy-cta:hover {
+    transform: translateX(5px);
+}
+
+.policy-cta:hover i {
+    transform: translateX(3px);
+}
+
+.privacy-badge {
+    position: absolute;
+    top: 1.5rem;
+    right: -3rem;
+    background: var(--primary-accent);
+    color: white;
+    padding: 1rem 2rem;
+    transform: rotate(45deg);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.privacy-features {
+    list-style: none;
+    padding: 1rem 0;
+}
+
+.privacy-features li {
+    display: flex;
+    align-items: center;
+    margin: 0.8rem 0;
+    color: #444;
+}
+
+.privacy-features i {
+    margin-right: 0.8rem;
+    color: var(--primary-accent);
+}
+
+@@media (max-width: 768px) {
+    .policy-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .policy-card.featured {
+        transform: none;
+    }
+}
+</style>

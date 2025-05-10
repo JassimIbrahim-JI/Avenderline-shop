@@ -1,0 +1,153 @@
+﻿@model Category
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Category Details";
+}
+
+<div class="container-fluid px-4">
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-primary text-white py-3">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <h1 class="h3 mb-0">@Model.Name Details</h1>
+                </div>
+                <div class="col-6 text-end">
+                    <a asp-action="Index" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Categories
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-4">
+                <!-- Category Information -->
+                <div class="col-12 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-img-top position-relative overflow-hidden" style="height: 250px;">
+                            <img src="@Model.ImageUrl" class="img-fluid w-100 h-100 object-fit-cover" alt="@Model.Name">
+                            <span class="position-absolute top-0 end-0 m-2 badge bg-@(Model.IsBanner ? "success" : "secondary")">
+                                @(Model.IsBanner ? "Banner" : "Regular")
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Category Info</h5>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5">Category ID</dt>
+                                <dd class="col-sm-7">@Model.CategoryId</dd>
+
+                                <dt class="col-sm-5">Total Products</dt>
+                                <dd class="col-sm-7">@Model.Products?.Count.ToString()</dd>
+
+                                <dt class="col-sm-5">Created</dt>
+                                <dd class="col-sm-7">@DateTime.Now.ToString("dd MMM yyyy")</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div class="col-12 col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light py-3">
+                            <h5 class="mb-0">Products in Category</h5>
+                        </div>
+
+                        <div class="card-body">
+                            @if (Model.Products != null && Model.Products.Any())
+                            {
+                                <div class="row g-4">
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <div class="card h-100 border-0 shadow-sm product-card">
+                                                <img src="@product.ImageUrl" class="card-img-top object-fit-cover"
+                                                     alt="@product.Name" style="height: 180px;">
+                                                <div class="card-body">
+                                                    <h6 class="card-title mb-2">@product.Name</h6>
+                                                    <p class="text-success mb-2">
+                                                        @product.Price.ToString("C", new CultureInfo("ar-QA"))
+                                                    </p>
+                                                    <div class="d-flex gap-2">
+                                                        <a asp-action="Edit" asp-controller="AdminProduct"
+                                                           asp-route-id="@product.ProductId"
+                                                           class="btn btn-sm btn-outline-primary flex-fill">
+                                                            <i class="fas fa-edit me-1"></i>Edit
+                                                        </a>
+                                                        <button class="btn btn-sm btn-outline-danger flex-fill"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#deleteModal-@product.ProductId">
+                                                            <i class="fas fa-trash me-1"></i>Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal-@product.ProductId" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Confirm Delete</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Are you sure you want to delete @product.Name?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <form asp-action="Delete" asp-controller="AdminProduct"
+                                                              asp-route-id="@product.ProductId" method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">
+                                                                Cancel
+                                                            </button>
+                                                            <button type="submit" class="btn btn-danger">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-5">
+                                    <div class="empty-state-icon">
+                                        <i class="fas fa-box-open fa-3x text-muted"></i>
+                                    </div>
+                                    <h5 class="mt-3">No Products Found</h5>
+                                    <p class="text-muted">This category doesn't contain any products yet.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <style>
+        .product-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            }
+
+        .empty-state-icon {
+            opacity: 0.6;
+        }
+
+        .object-fit-cover {
+            object-fit: cover;
+            object-position: center;
+        }
+    </style>

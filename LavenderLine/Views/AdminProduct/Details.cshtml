@@ -1,0 +1,162 @@
+﻿@model LavenderLine.ViewModels.Products.ProductViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container-fluid px-4">
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-primary text-white py-3">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <h1 class="h3 mb-0">@Model.Name Details</h1>
+                </div>
+                <div class="col-6 text-end">
+                    <a asp-action="Index" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Products
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-4">
+                <!-- Product Image and Basic Info -->
+                <div class="col-12 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-img-top position-relative overflow-hidden ratio ratio-1x1">
+                            <img src="@Model.ImageUrl" class="img-fluid object-fit-cover" alt="@Model.Name">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-@(Model.IsActive ? "success" : "secondary")">
+                                    @(Model.IsActive ? "Active" : "Inactive")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Basic Information</h5>
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5">Product ID</dt>
+                                <dd class="col-sm-7">@Model.ProductId</dd>
+
+                                <dt class="col-sm-5">Price</dt>
+                                <dd class="col-sm-7">QR @Model.Price.ToString("N0")</dd>
+
+                                <dt class="col-sm-5">Stock</dt>
+                                <dd class="col-sm-7">@Model.Quantity</dd>
+
+                                <dt class="col-sm-5">Category</dt>
+                                <dd class="col-sm-7">@Model.CategoryName</dd>
+
+                                <dt class="col-sm-5">Created</dt>
+                                <dd class="col-sm-7">@Model.CreatedDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("MM/dd/yyyy", new CultureInfo("en-QA"))</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Information -->
+                <div class="col-12 col-lg-8">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-light py-3">
+                            <h5 class="mb-0">Product Specifications</h5>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row g-4">
+                                <!-- Status Badges -->
+                                <div class="col-12">
+                                    <div class="d-flex gap-2 mb-4">
+                                        <span class="badge bg-@(Model.IsFeatured ? "warning" : "secondary")">
+                                            <i class="fas fa-star me-1"></i>
+                                            @(Model.IsFeatured ? "Featured" : "Regular")
+                                        </span>
+                                        <span class="badge bg-@(Model.IsExcludedFromRelated ? "danger" : "success")">
+                                            @(Model.IsExcludedFromRelated ? "Excluded from Related" : "Included in Related")
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Lengths -->
+                                <div class="col-12 col-md-6">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Available Lengths</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            @if (Model.Lengths.Any())
+                                            {
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    @foreach (var length in Model.Lengths)
+                                                    {
+                                                        <span class="badge bg-primary">@length</span>
+                                                    }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted mb-0">No lengths specified</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sizes -->
+                                <div class="col-12 col-md-6">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Available Sizes</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            @if (Model.Sizes.Any())
+                                            {
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    @foreach (var size in Model.Sizes)
+                                                    {
+                                                        <span class="badge bg-info">@size</span>
+                                                    }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted mb-0">No sizes specified</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="col-12">
+                                    <div class="d-flex gap-2 justify-content-end border-top pt-4">
+                                        <a asp-action="Edit" asp-route-id="@Model.ProductId"
+                                           class="btn btn-warning px-4">
+                                            <i class="fas fa-edit me-2"></i>Edit Product
+                                        </a>
+                                        <a asp-action="Index" class="btn btn-outline-secondary">
+                                            <i class="fas fa-list me-2"></i>All Products
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .object-fit-cover {
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.5em 0.75em;
+    }
+</style>

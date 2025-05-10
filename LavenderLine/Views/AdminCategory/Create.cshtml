@@ -1,0 +1,180 @@
+﻿@model LavenderLine.ViewModels.Banners.CategoryViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Create Category";
+}
+
+<div class="container-fluid px-4">
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h3 class="mb-0">Create New Category</h3>
+        </div>
+        <div class="card-body">
+            <form id="createCategoryForm" asp-action="Create" method="post" enctype="multipart/form-data">
+                <div class="row g-4">
+                    <!-- Left Column -->
+                    <div class="col-lg-8">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="Name" class="form-label">Category Name</label>
+                                <input asp-for="Name" class="form-control" placeholder="Enter category name" />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input asp-for="IsBanner" class="form-check-input" />
+                                    <label asp-for="IsBanner" class="form-check-label">Show as Banner</label>
+                                </div>
+                                <span asp-validation-for="IsBanner" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <!-- Image Upload -->
+                                <div class="mb-4">
+                                    <label asp-for="ImageFile" class="form-label">Category Image</label>
+                                    <div class="file-upload-wrapper border rounded-3 p-3 text-center">
+                                        <input asp-for="ImageFile" type="file" class="form-control" 
+                                               accept="image/*" onchange="previewImage(this)" />
+                                        <div class="file-upload-preview-wrapper">
+                                            <div class="file-upload-message">
+                                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                                <p class="mb-1">Drag and drop or click to upload</p>
+                                                <small class="text-muted">(Max 5MB)</small>
+                                            </div>
+                                            <img id="imagePreview" class="img-fluid rounded" />
+                                        </div>
+                                    </div>
+                                    <span asp-validation-for="ImageFile" class="text-danger small"></span>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Create Category
+                                    </button>
+                                    <a asp-action="Index" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            function previewImage(input) {
+                const preview = document.getElementById('imagePreview');
+                const message = document.querySelector('.file-upload-message');
+
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        preview.src = e.target.result;
+                        preview.classList.add('visible');
+                        message.style.display = 'none';
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                } else {
+                    preview.classList.remove('visible');
+                    message.style.display = 'block';
+                }
+            }
+
+            $(document).ready(function () {
+                $('#createCategoryForm').submit(function (e) {
+                    e.preventDefault();
+
+                    var formData = new FormData(this);
+
+                    $.ajax({
+                        url: $(this).attr('action'),
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            if (response.success) {
+                                Toast.show('success', response.message);
+                                setTimeout(() => {
+                                    window.location.href = response.redirectUrl || '@Url.Action("Index")';
+                                }, 1500);
+                            } else {
+                                if (response.errors) {
+                                    // Handle validation errors
+                                    Object.entries(response.errors).forEach(([field, errors]) => {
+                                        errors.forEach(error => {
+                                            Toast.show('danger', `${field}: ${error}`);
+                                        });
+                                    });
+                                } else {
+                                    Toast.show('danger', response.message || 'An error occurred');
+                                }
+                            }
+                        },
+                        error: function (xhr) {
+                            Toast.show('danger', 'Request failed: ' + xhr.statusText);
+                        }
+                    });
+                });
+            });
+        </script>
+}
+
+<style>
+    .file-upload-wrapper {
+        position: relative;
+        min-height: 200px;
+        background-color: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .file-upload-preview-wrapper {
+        position: relative;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #imagePreview {
+        max-height: 200px;
+        object-fit: contain;
+        display: none !important;
+    }
+
+    #imagePreview.visible {
+        display: block !important;
+    }
+
+    .file-upload-message {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 0;
+        pointer-events: none;
+        text-align: center;
+    }
+
+    input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 1;
+    }
+</style>

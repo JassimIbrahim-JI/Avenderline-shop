@@ -1,0 +1,227 @@
+﻿@model LavenderLine.ViewModels.Products.ProductViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="text-bg-secondary">Create Product</h2>
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+           
+           <form id="createProductForm" enctype="multipart/form-data" asp-action="Create" method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label">Product Name</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label">Description</label>
+                            <textarea asp-for="Description" class="form-control"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Price" class="control-label">Current Price</label>
+                            <input asp-for="Price" class="form-control" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="OriginalPrice" class="control-label">Original Price (if applicable)</label>
+                            <input asp-for="OriginalPrice" class="form-control" />
+                            <span asp-validation-for="OriginalPrice" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Quantity" class="control-label">Total Quantity</label>
+                            <input asp-for="Quantity" class="form-control" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CategoryId" class="control-label">Category</label>
+                            <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
+                                <option value="">Select a category</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                Inventory Combinations
+                                <button type="button" class="btn btn-sm btn-primary float-end" onclick="addColorRow()">
+                                    Add Length
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary float-end me-2" onclick="addSizeRow()">
+                                    Add Size
+                                </button>
+                            </div>
+                            <div class="card-body" id="lengthInventory">
+                                @for (int i = 0; i < Model.Lengths.Count; i++)
+                                {
+                                    <div class="row inventory-row mb-2">
+                                        <div class="col-md-4">
+                                            <input class="form-control" name="Lengths[@i]" value="@Model.Lengths.ElementAt(i)" placeholder="Length(s)" required />
+                                            <span asp-validation-for="Lengths" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-danger" onclick="removeRow(this)">×</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-body" id="sizeInventory">
+                                @for (int i = 0; i < Model.Sizes.Count; i++)
+                                {
+                                    <div class="row inventory-row mb-2">
+                                        <div class="col-md-4">
+                                            <input class="form-control" name="Sizes[@i]" value="@Model.Sizes.ElementAt(i)" placeholder="Size" required />
+                                            <span asp-validation-for="Sizes" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-danger" onclick="removeRow(this)">×</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label asp-for="ImageFile" class="control-label">Product Image</label>
+                            <input asp-for="ImageFile" type="file" class="form-control" id="ImageFile" accept="image/*" />
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <img src="@Model.ImageUrl" alt="Product Image Preview" id="imagePreview" style="max-width:200px; max-height:200px;" />
+                            }
+                            else
+                            {
+                                <img id="imagePreview" alt="Image Preview" style="display:none; max-width:200px; max-height:200px;" />
+                            }
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Initialize indexes
+    let combinationColorIndex = @Model.Lengths.Count;
+    let combinationSizeIndex = @Model.Sizes.Count;
+
+    function addColorRow() {
+        const lengthTemplate = `
+            <div class="row inventory-row mb-2">
+                <div class="col-md-4">
+                    <input class="form-control" name="Lengths[${combinationColorIndex}]" 
+                           placeholder="Length(s)" required />
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger" onclick="removeRow(this)">×</button>
+                </div>
+            </div>`;
+        document.getElementById('lengthInventory').insertAdjacentHTML('beforeend', lengthTemplate);
+        combinationColorIndex++;
+    }
+
+    function addSizeRow() {
+        const sizeTemplate = `
+            <div class="row inventory-row mb-2">
+                <div class="col-md-4">
+                    <input class="form-control" name="Sizes[${combinationSizeIndex}]" 
+                           placeholder="Size" required />
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger" onclick="removeRow(this)">×</button>
+                </div>
+            </div>`;
+        document.getElementById('sizeInventory').insertAdjacentHTML('beforeend', sizeTemplate);
+        combinationSizeIndex++;
+    }
+
+    function removeRow(button) {
+        const row = button.closest('.inventory-row');
+        row.remove();
+        // Re-index remaining elements
+        reindexInputs('lengthInventory', 'Lengths');
+        reindexInputs('sizeInventory', 'Sizes');
+    }
+
+    function reindexInputs(containerId, prefix) {
+        const container = document.getElementById(containerId);
+        const inputs = container.querySelectorAll(`input[name^="${prefix}["]`);
+        inputs.forEach((input, index) => {
+            input.name = `${prefix}[${index}]`;
+        });
+        // Update global index
+        if (prefix === 'Lengths') combinationColorIndex = inputs.length;
+        if (prefix === 'Sizes') combinationSizeIndex = inputs.length;
+    }
+
+    // Image Preview Handler
+    document.getElementById('ImageFile').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('imagePreview');
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+
+    // Form Submission
+    document.getElementById('createProductForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        // Client-side validation
+            const lengthInputs = Array.from(document.querySelectorAll('#lengthInventory input'))
+                               .map(input => input.value.trim())
+                               .filter(Boolean);
+        const sizeInputs = Array.from(document.querySelectorAll('#sizeInventory input'))
+                              .map(input => input.value.trim())
+                              .filter(Boolean);
+
+            if (lengthInputs.length < 2 || sizeInputs.length < 2) {
+            Toast.show('warning', 'Please provide at least 2 lengths and 2 sizes');
+            return;
+        }
+
+        document.getElementById('loading-overlay').style.display = 'flex';
+
+        fetch('@Url.Action("Create", "AdminProduct")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Toast.show('success', data.message);
+                setTimeout(() => window.location.href = '@Url.Action("Index", "AdminProduct")', 1500);
+            } else {
+                Toast.show('danger', data.message);
+            }
+        })
+        .catch(error => {
+            Toast.show('danger', 'An error occurred: ' + error.message);
+        })
+        .finally(() => {
+             document.getElementById('loading-overlay').style.display = 'none';
+        });
+    });
+</script>
+}

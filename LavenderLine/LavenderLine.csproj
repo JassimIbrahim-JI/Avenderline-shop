@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	  <UserSecretsId>7c5907c3-d3dd-46a7-8cb5-6bd5f2300b09</UserSecretsId>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<Content Remove="wwwroot\email-templates\SubscribeEmail.html" />
+		<Content Remove="wwwroot\svgs\google.svg" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<_ContentIncludedByDefault Remove="wwwroot\email-templates\PaymentsConfrimation.html" />
+		<_ContentIncludedByDefault Remove="wwwroot\svgs\google.svg" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="13.0.1" />
+		<PackageReference Include="Google.Cloud.Storage.V1" Version="4.13.0" />
+		<PackageReference Include="itext7" Version="9.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8">
+			<TreatAsUsed>true</TreatAsUsed>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+
+		<PackageReference Include="NodaTime" Version="3.2.2" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="8.0.8" />
+		<PackageReference Include="SendGrid" Version="9.29.3" />
+		<PackageReference Include="Twilio" Version="7.5.0" />
+		<PackageReference Include="Zxcvbn-Core" Version="7.0.92" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Secret\" />
+		<Folder Include="wwwroot\img-product\" />
+		<Folder Include="wwwroot\img-category\" />
+		<Folder Include="wwwroot\img-carousel\" />
+		<Folder Include="wwwroot\img-post\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="wwwroot\email-templates\SubscribeEmail.html" />
+		<None Include="wwwroot\svgs\google.svg" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="LavenderLine" />
+		<Using Include="LavenderLine.Models" />
+		<Using Include="LavenderLine.Data" />
+		<Using Include="LavenderLine.ViewModels" />
+		<Using Include="LavenderLine.DTO" />
+		<Using Include="LavenderLine.EmailServices" />
+		<Using Include="LavenderLine.Extensions" />
+		<Using Include="LavenderLine.Repositories" />
+		<Using Include="LavenderLine.Services" />
+		<Using Include="LavenderLine.ViewModels.Accounts" />
+		<Using Include="LavenderLine.ViewModels.Users" />
+		<Using Include="LavenderLine.ViewModels.Actions" />
+	</ItemGroup>
+	
+
+</Project>

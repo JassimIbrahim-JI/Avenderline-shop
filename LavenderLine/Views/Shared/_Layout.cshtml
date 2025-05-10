@@ -1,0 +1,500 @@
+﻿
+@{
+    // 1. User Information
+    var fullName = User?.Identity?.IsAuthenticated == true
+        ? User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value
+        : string.Empty;
+
+    var userId = User?.Identity?.IsAuthenticated == true
+      ? User.FindFirstValue(ClaimTypes.NameIdentifier)
+      : Context.Session.GetString("UserId") ?? Guid.NewGuid().ToString();
+
+    if (!User?.Identity?.IsAuthenticated == true && Context.Session.GetString("UserId") == null)
+    {
+        Context.Session.SetString("UserId", userId);
+    }
+
+    // 2. Fetch Data Once to Avoid Multiple Calls
+    var cartData = await CartService.GetCartAsync(userId);
+    var cartItems = cartData.Items ?? Enumerable.Empty<CartItemDto>();
+    var cartCount = cartItems.Count();
+    var cartTotal = cartData.Total;
+
+    var wishlist = await _wishlistService.GetWishlistAsync(userId);
+    var wishlistItems = wishlist?.Items ?? Enumerable.Empty<WishlistItemDto>();
+    var wishlistCount = wishlistItems.Count();
+
+    var carouselImages = await CarouselImageService.GetAllImagesAsync();
+    var imageList = carouselImages?.ToList() ?? new List<CarouselImage>();
+
+    // 3. View Detection
+    var controllerName = ViewContext.RouteData.Values["controller"]?.ToString();
+    var actionName = ViewContext.RouteData.Values["action"]?.ToString();
+    var isHomeView = controllerName == "Home" && actionName == "Index";
+    var isShopView = controllerName == "Home" && actionName == "Shop";
+    var isArrivalsView = controllerName == "Home" && actionName == "Arrivals";
+
+    var homeImages = imageList.Where(i => i.IsActiveHome).ToList();
+    var shopImages = imageList.Where(i => i.IsActiveShop).ToList();
+    var arrivalsImages = imageList.Where(i => i.IsActiveArrivals).ToList();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="JR0tvBuYo2gs0kEGEb30ZBl5-4012jy7HC79hJfKo5c" />
+    <meta name="__RequestVerificationToken" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken">
+
+    <meta name="user-logged-in" content="@User.Identity.IsAuthenticated.ToString().ToLower()" />
+
+    <title>@ViewData["Title"] - AvenderLine</title>  
+     <link rel="icon" type="image/x-icon" href="~/avenderline.ico" />
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Font -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Jost:wght@400&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Jost:wght@400&display=swap" rel="stylesheet">
+    </noscript>
+   
+
+    <!--Owl Carousel -->
+    <link href="https://cdn.jsdelivr.net/npm/owl.carousel@2.3.4/dist/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/owl.carousel@2.3.4/dist/assets/owl.theme.default.min.css" rel="stylesheet">
+    
+    <!-- noUiSlider CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/nouislider@15.5.0/dist/nouislider.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true" />
+
+</head>
+<body class="d-flex flex-column h-100">
+
+    @await Html.PartialAsync("_Toast")
+
+    <!-- Page Preloder -->
+    <div id="preloder">
+        <div class="loader"></div>
+    </div>
+
+
+    <header class="site-header @(isHomeView && homeImages.Any() ? "has-carousel" : "")">
+        <nav id="middleNavbar" class="navbar navbar-expand-lg navbar-light bg-white middle-navbar d-none d-lg-block">
+            <div class="container py-2">
+                <a class="navbar-brand" href="@Url.Action("Index", "Home")" aria-label="Home">
+                        <img src="~/svgs/avenderline-dark.svg" alt="Avenderline" class="navbar-logo" />
+                </a>
+                <div class="input-group search-container">
+                    <button class="btn search-icon" type="button" aria-label="Open search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <input type="text" class="form-control search-input" placeholder="Search products..." id="searchInput">
+                    <div class="search-results-dropdown" id="searchResultsDropdown"></div>
+                </div>
+
+                <div class="dropdown language-selector d-lg-block d-none me-3">
+                    <button class="dropdown-toggle d-flex align-items-center" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="flag-container">
+                            <img src="~/img/@(CultureInfo.CurrentCulture.Name == "ar" ? "qatar.png" :"united-kingdom.png")" alt="@CultureInfo.CurrentCulture.DisplayName" class="language-flag" />
+                        </div>
+                        <span class="language-code">@CultureInfo.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
+                         <i class="fa fa-chevron-down language-arrow"></i> 
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="@Url.Action("ChangeLanguage", "Home", new { culture = "ar",  returnUrl = Context.Request.Path + Context.Request.QueryString  })">
+                                <div class="flag-container">
+                                    <img src="~/img/qatar.png" alt="Arabic" class="language-flag" />
+                                </div>
+                                <span class="language-code">AR</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="@Url.Action("ChangeLanguage", "Home", new { culture = "en",  returnUrl = Context.Request.Path + Context.Request.QueryString  })">
+                                <div class="flag-container">
+                                    <img src="~/img/united-kingdom.png" alt="English" class="language-flag" />
+                                </div>
+                                <span class="language-code">EN</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                @if (User?.Identity?.IsAuthenticated == true)
+                {
+
+                    <div class="dropdown language-selector d-lg-block d-none">
+                        <a class="account-toggle d-flex align-items-center"
+                           href="#"
+                           role="button"
+                           id="accountDropdown"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false"
+                             >
+                            <i class="fa-solid fa-user me-2"></i>
+                            @(fullName ?? "Account")
+
+                            <span class="badge-notification"></span>
+                            <i class="fa fa-chevron-down language-arrow"></i>
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+                            <li>
+                                <a class="dropdown-item" asp-action="Profile" asp-controller="Account">
+                                    <i class="fa-solid fa-user-gear me-2"></i> Profile
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" asp-action="Logout" asp-controller="Account">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+
+                else
+                {
+                    <a href="@Url.Action("Login", "Account")" class="text-decoration-none d-lg-block d-none ms-1 login-link text-dark">
+                        <i class="fas fa-sign-in-alt text-dark"></i> Login
+                    </a>
+                }
+            </div>
+        </nav>
+        <nav id="bottomNavbar" class="navbar navbar-expand-lg navbar-dark bottom-navbar @(isHomeView && homeImages.Any() ? "has-carousel" : "")">
+            <div class="container p-2">
+                <button class="navbar-toggler order-1" type="button" data-bs-toggle="collapse" data-bs-target="#bottomNavbarContent" aria-controls="bottomNavbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <a class="navbar-brand d-lg-none ms-auto order-2" href="#">
+                    <img src="~/svgs/avenderline-mobile.svg" alt="Avenderline" class="navbar-logo" />
+                </a>
+
+                <div class="collapse navbar-collapse py-3 py-lg-0 order-lg-1" id="bottomNavbarContent">
+
+                    <div class="d-lg-none mb-3 position-relative">
+                        <div class="input-group search-container">
+                            <button class="btn search-icon" type="button" aria-label="Open search">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <input type="text" class="form-control search-input" placeholder="Search products..." id="searchInput">
+                            <div class="search-results-dropdown" id="searchResultsDropdown"></div>
+                        </div>
+                    </div>
+                    
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link @(ViewData["ActiveLink"] as string == "Index" ? "active" : "")" href="@Url.Action("Index","Home")">Home</a></li>
+                        <li class="nav-item"><a class="nav-link @(ViewData["ActiveLink"] as string == "Shop" ? "active" : "")" href="@Url.Action("Shop","Home")">Shop</a></li>
+                        <li class="nav-item"><a class="nav-link @(ViewData["ActiveLink"] as string == "Arrivals" ? "active" : "")" href="@Url.Action("Arrivals","Home")">New Arrivals</a></li>
+                        <li class="nav-item"><a class="nav-link @(ViewData["ActiveLink"] as string == "Privacy" ? "active":"")" href="@Url.Action("Privacy","Home")">Our Privacy</a></li>
+                        @if (User?.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("Manager")))
+                        {
+                            <li class="nav-item"><a class="nav-link @(ViewData["ActiveLink"] as string == "Dashboard" ? "active" :"")" href="@Url.Action("Index","AdminDashboard")">Dashboard</a></li>
+                        }
+                    </ul>
+
+
+                    <div class="dropdown language-selector d-lg-none d-block me-3 text-white">
+                        <button class="dropdown-toggle d-flex align-items-center" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="flag-container">
+                                <img src="~/img/@(CultureInfo.CurrentCulture.Name == "ar" ? "qatar.png" :"united-kingdom.png")" alt="Current Language" class="language-flag" />
+                            </div>
+                            <span class="language-code">@CultureInfo.CurrentCulture.TwoLetterISOLanguageName.ToUpper()</span>
+                              <i class="fa fa-chevron-down language-arrow"></i> 
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-start" aria-labelledby="languageDropdown">
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="@Url.Action("ChangeLanguage", "Home", new { culture = "ar",  returnUrl = Context.Request.Path + Context.Request.QueryString})">
+                                    <div class="flag-container">
+                                        <img src="~/img/qatar.png" alt="Arabic" class="language-flag" />
+                                    </div>
+                                    <span class="language-code">AR</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="@Url.Action("ChangeLanguage", "Home", new { culture = "en",  returnUrl = Context.Request.Path + Context.Request.QueryString})">
+                                    <div class="flag-container">
+                                        <img src="~/img/united-kingdom.png" alt="English" class="language-flag" />
+                                    </div>
+                                    <span class="language-code">EN</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+                <div class="navbar-icons d-flex ms-auto me-lg-0 order-3">
+
+                    <div class="position-relative">
+                        <a href="#" class="nav-icon wishlist-icon" aria-expanded="false" aria-controls="wishlist-dropdown">
+                            <i class="fas fa-shopping-bag fs-6" aria-hidden="true"></i>
+                            <span id="wishlistItemCount" class="badge @(wishlistCount > 0 ? "" : "d-none")">
+                                @wishlistCount
+                            </span>
+                        </a>
+                        <div class="wishlist-dropdown" id="wishlist-dropdown" aria-labelledby="wishlist-icon">
+                            <div class="wishlist-header d-flex justify-content-between align-items-center">
+                                <h5>Your Wishlist</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="wishlist-dropdown" aria-label="Close"></button>
+                            </div>
+                            <div id="wishlist-items">
+                                <partial name="~/Views/Wishlist/_WishlistPartial.cshtml" model="wishlistItems" />
+                            </div>
+                        </div>
+                    </div>
+                 
+                    <div class="position-relative">
+                        <a href="#" class="nav-icon cart-icon" aria-expanded="false" aria-controls="cart-dropdown">
+                            <i class="fas fa-shopping-cart fs-6" aria-hidden="true"></i>
+                            <span id="cartItemCount" class="badge @((cartCount > 0) ? "":"d-none")">@cartCount</span>
+                        </a>
+                        <div id="cart-dropdown" class="cart-dropdown" aria-labelledby="cart-icon">
+                            <div class="cart-header d-flex justify-content-between align-items-center">
+                                <h5>Your Cart</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="cart-dropdown" aria-label="Close"></button>
+                            </div>
+                            <div id="cart-items" aria-live="polite">
+                                <partial name="~/Views/Cart/_CartItemsPartial.cshtml" model="cartItems" />
+                            </div>
+                        </div>     
+                    </div>
+
+                    <div class="text-white mx-3 @(cartCount == 0 ? "d-none" : "d-block")" id="cart-total-container">
+                            <span id="cart-total">QR @cartTotal.ToString("N0") </span>
+                        </div>
+
+                    @if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="dropdown language-selector d-lg-none d-block ms-1">
+                            <a class="account-toggle d-flex align-items-center text-white"
+                               href="#"
+                               role="button"
+                               id="accountDropdown"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false">
+                                <i class="fa-solid fa-user me-2 text-white"></i>
+
+                                <i class="fa fa-chevron-down language-arrow text-white"></i>
+                                <span class="notification-badge"></span>
+
+                            </a>
+
+                            <ul class="dropdown-user-menu dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+                                <li>
+                                    <a class="dropdown-item" asp-action="Profile" asp-controller="Account">
+                                        <i class="fa-solid fa-user-gear me-2"></i> @(fullName ?? "Profile")
+                                    </a>
+                                </li>
+
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" asp-action="Logout" asp-controller="Account">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="text-decoration-none ms-1 d-lg-none d-block login-link">
+                            <i class="fas fa-sign-in-alt text-white"></i> Login
+                        </a>
+                    }
+                </div>
+             
+               
+            </div>
+        </nav>
+
+        @if (isHomeView && homeImages.Any())
+        {
+           
+                <div id="fashionCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                    @for (int i = 0; i < imageList.Count(); i++)
+                    {
+                        <button type="button"
+                                data-bs-target="#brandHeroCarousel"
+                                data-bs-slide-to="@i"
+                                class="@(i == 0 ? "active" : "")"
+                                aria-current="@(i == 0 ? "true" : "false")"
+                                aria-label="Slide @(i + 1)">
+                        </button>
+                    }
+                    </div>
+                <div class="carousel-inner">
+                    @for (int i = 0; i < imageList.Count(); i++)
+                    {
+                        var image = imageList[i];
+                        <div class="carousel-item @(i == 0 ? "active" : "")" style="background-image: url('@image.ImageUrl');">
+                            <div class="carousel-overlay"></div>
+                            <div class="carousel-caption d-flex flex-column justify-content-center align-items-center text-center">
+                                <h1 class="display-3 mb-3">@image.Caption</h1>
+                                <p class="mb-4">@image.Description</p>
+                                <a href="@Url.Action("Shop", "Home")" class="btn btn-primary">
+                                    Shop Now <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                </div>
+            }
+
+        @if(isShopView)
+        {
+        <div class="page-header">
+            <div class="shop-header"
+                    style="background-image: url('@(shopImages.FirstOrDefault()?.ImageUrl ?? Url.Content("~/img/shop-header.jpeg"))');">
+                <div class="header-content">
+                    @if (shopImages.FirstOrDefault() != null)
+                    {
+                        <h1>@shopImages.First().Caption</h1>
+                        <p>@shopImages.First().Description</p>
+                    }
+                    else
+                    {
+                        <h1>Our AvenderLine Abayas</h1>
+                        <p>Explore our exclusive collection of stylish abayas.</p>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+
+        @if(isArrivalsView)
+        {
+        <div class="page-header">
+            <div class="shop-header"
+                    style="background-image: url('@(arrivalsImages.FirstOrDefault()?.ImageUrl ?? Url.Content("~/img/arrival-header.jpeg"))');">
+                <div class="header-content">
+                    @if (arrivalsImages.FirstOrDefault() != null)
+                    {
+                        <h1>@arrivalsImages.First().Caption</h1>
+                        <p>@arrivalsImages.First().Description</p>
+                    }
+                    else
+                    {
+                        <h1>New Arrivals</h1>
+                        <p>Discover our latest additions</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+    }
+      
+    </header>
+
+    <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    <!-- Footer -->
+    <div class="container-fluid mt-5">
+        <div class="row justify-content-center border-top footer-custom text-white">
+            <div class="col-md-4 col-sm-6 col-12 footer-section">
+
+                <a class="navbar-brand" href="@Url.Action("Index", "Home")" aria-label="Home">
+                    <img src="~/svgs/avenderline-white.svg" alt="Avenderline" class="footer-logo" />
+                </a>
+
+                <p class="small mt-4 newsletter-text">
+                        Discover the elegance of Qatari fashion with Avenderline, your go-to brand for exquisite abayas that blend traditional craftsmanship with modern style. Embrace the beauty of Doha's rich heritage while making a statement with our latest collections.
+                    </p>
+           
+            </div>
+            <div class="col-md-4 col-sm-6 col-12 footer-section">
+                <h5 class="mb-4">INFORMATION</h5>
+                <ul class="list-unstyled">
+                    @if(User!.Identity.IsAuthenticated)
+                    {
+                        <li><a asp-action="Profile" asp-controller="Account" class="footer-link  @(ViewData["ActiveLink"] as string == "Profile" ? "active":"")">Account</a></li>
+                    } else
+                    {
+                        <li><a asp-action="Login" asp-controller="Account" class="footer-link  @(ViewData["ActiveLink"] as string == "Login" ? "active":"")">Account</a></li>
+                    }
+
+                    <li><a asp-action="Privacy" asp-controller="Home" class="footer-link  @(ViewData["ActiveLink"] as string == "Privacy" ? "active":"")">Our Policies</a></li>
+                    <li><a asp-action="Shop" asp-controller="Home" class="footer-link  @(ViewData["ActiveLink"] as string == "Shop" ? "active":"")">Shop</a></li>
+                    <li><a asp-action="Arrivals" asp-controller="Home" class="footer-link  @(ViewData["ActiveLink"] as string == "Arrivals" ? "active":"")">New In</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 col-sm-8 col-12 footer-section">
+                <h5 class="mb-4">NEWSLETTER SIGN UP</h5>
+                <p class="small newsletter-text"> Sign up for exclusive updates, new arrivals & insider only discounts </p>
+                <form method="post" id="nonAuthSubscribeForm">
+                    @Html.AntiForgeryToken()
+                    <div class="input-group mb-3">
+                        <input type="email" id="emailInput" required
+                               title="Please enter a valid email address (e.g., user@domain.com)"
+                               class="form-control" placeholder="Enter your email address"
+                               aria-label="Email Address" aria-describedby="button-addon2">
+                        <button class="btn btn-primary" type="button" id="button-addon2">Subscribe</button>
+                    </div>
+                </form>
+                <div class="social-icons mb-3 p-2">
+                    <a href="#" class="me-2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="chat me">
+                        <i class="fab fa-whatsapp text-success"></i>
+                    </a>
+                    <a href="#" class="me-2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="instagram">
+                        <i class="fab fa-instagram text-primary"></i>
+                    </a>
+           
+                    <a href="#" class="me-2" data-bs-toggle="tooltip" data-bs-placement="bottom" title="X">
+                        <i class="fab fa-twitter text-dark"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row p-4 border-top text-xl-start footer-custom text-white">
+            <div class="col d-flex flex-column flex-md-row justify-content-between align-items-center">
+                <p class="mb-0 small copyright">&copy; 2024 AVENDERLINE. All Rights Reserved. Developed By Jassim Ibrahim</p>
+                <div class="payment-methods mt-3 mt-md-0">
+                    <img src="~/svgs/mastercard.svg" class="icon icon--full-color" alt="Mastercard" width="38" height="24" />
+                    <img src="~/svgs/visa.svg" class="icon icon--full-color" alt="Visa" width="38" height="24" />
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- jQuery 3.6 -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <!-- Bootstrap 5 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Owl Carousel2 -->
+    <script src="https://cdn.jsdelivr.net/npm/owl.carousel@2.3.4/dist/owl.carousel.min.js"></script>
+    <!-- noUiSlider Slider -->
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.5.0/dist/nouislider.min.js"></script>
+    <!-- Custom Scripts -->
+    <script src="~/js/toast.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/countdown.js"></script>
+    <script src="~/js/cartManager.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+   
+</body>
+</html>

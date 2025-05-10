@@ -1,0 +1,133 @@
+﻿@model LavenderLine.Models.Order
+
+@{
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<style>
+    .success-icon {
+        animation: bounce 1s ease-in-out;
+    }
+
+    @@keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+
+        40% {
+            transform: translateY(-30px);
+        }
+
+        60% {
+            transform: translateY(-15px);
+        }
+    }
+</style>
+
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <div class="success-icon mb-3">
+            <i class="fas fa-check-circle fa-5x text-success"></i>
+        </div>
+        <h1 class="mb-3">Order Confirmed!</h1>
+        <p class="lead">Your order has been successfully processed.</p>
+    </div>
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Summary</h5>
+        </div>
+        <div class="card-body">
+           
+            <div class="mb-4">
+                <h5>Order Details</h5>
+                <p><strong>Order ID:</strong> @Model.OrderId</p>
+                <p><strong>Subtotal:</strong>QR @((Model.TotalAmount - Model.ShippingFee).ToString("N0"))</p>
+                <p><strong>Shipping Fee:</strong>QR @Model.ShippingFee.ToString("N0")</p>
+                <p><strong>Total Amount:</strong>QR @Model.TotalAmount.ToString("N0")</p>
+                <p><strong>Order Date:</strong> @Model.OrderDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)</p>
+            </div>
+
+           
+            <div class="mb-4">
+                <h5>Payment Details</h5>
+                @if (Model.Payment != null)
+                {
+                    <p><strong>Payment Method:</strong> @Model.Payment.PaymentMethod</p>
+                    <p><strong>Payment Status:</strong> @Model.Payment.Status</p>
+                    <p><strong>Payment Date:</strong> @Model.Payment.PaymentDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToDateTimeUnspecified().ToString("MM/dd/yyyy hh:mm tt", CultureInfo.InvariantCulture)</p>
+                      @if (!string.IsNullOrEmpty(Model.Payment.PaymentIntentId))
+                       {
+                       <p><strong>MyFatoorah Transaction ID:</strong> @Model.Payment.PaymentIntentId</p>
+                       }
+                }
+                else
+                {
+                    <p>Payment details are not available.</p>
+                }
+
+            </div>
+
+            <!-- Ordered Items -->
+            <div class="mb-4">
+                <h5>Ordered Items</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Info</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <tr>
+                                <td class="align-middle">
+                                    <div class="d-flex align-items-center">
+                                        <img src="@item.Product.ImageUrl"
+                                             class="product-image-details me-3"
+                                             alt="@item.Product.Name">
+                                        <div>
+                                            <h6 class="mb-0">@item.Product.Name</h6>
+                                            <small class="text-muted">SKU: @item.Product.Category.Name</small>
+                                            <!-- Display Special Request if present -->
+                                            @if (!string.IsNullOrEmpty(item.SpecialRequest))
+                                            {
+                                                <div class="mt-2 text-info">
+                                                    <i class="fas fa-comment-alt me-2"></i>
+                                                    <strong>Special Request:</strong> @item.SpecialRequest
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="align-middle">
+                                    <div class="size-length-display">
+                                        @if (!string.IsNullOrEmpty(item.Size))
+                                        {
+                                            <div><strong>Size:</strong> @item.Size</div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.Length))
+                                        {
+                                            <div><strong>Length:</strong> @item.Length</div>
+                                        }
+                                        <div><strong>Qty:</strong> @item.Quantity</div>
+                                    </div>
+                                </td>
+
+                                <td><span class="currency-symbol">QR </span>@item.Product.Price.ToString("N0")</td>
+                                <td><span class="currency-symbol">QR </span>@((item.Price * item.Quantity).ToString("N0"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Continue Shopping Button -->
+            <div class="text-center">
+                <a href="@Url.Action("Shop", "Home")" class="btn btn-primary">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+</div>

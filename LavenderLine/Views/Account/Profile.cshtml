@@ -1,0 +1,198 @@
+﻿@model LavenderLine.ViewModels.Users.ProfileViewModel
+
+@{
+    Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+    ViewData["IsAdminLayout"] = true;
+    var completionPercentage = GetCompletionPercentage(Model);
+    var isProfileComplete = completionPercentage == 100;
+    var requireCompletion = TempData["RequireProfileCompletion"] as bool? ?? false;
+}
+
+<div class="profile-container mt-5">
+    <h2 class="profile-heading text-center">User Profile</h2>
+
+    @if (requireCompletion)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Please complete your profile to continue with checkout
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="completion-progress">
+        <div class="progress">
+            <div class="progress-bar"
+                 role="progressbar"
+                 style="width: @completionPercentage%"
+                 aria-valuenow="@completionPercentage"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+            </div>
+        </div>
+        <div class="completion-status text-center">
+            @if (isProfileComplete)
+            {
+                <span class="text-success">
+                    <i class="fas fa-check-circle"></i> Profile Complete!
+                </span>
+            }
+            else
+            {
+                <span class="text-muted">
+                    @completionPercentage% Complete - Fill all required fields
+                </span>
+            }
+        </div>
+    </div>
+
+    <!-- Nav tabs -->
+    <ul class="profile-nav-tabs nav nav-tabs" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-profile nav-link active" id="profileTab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">
+                Profile
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-profile nav-link profile-orders-tab" id="ordersTab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false">
+                My Orders
+                <span class="badge-notification"></span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="profile-tab-content tab-content" id="profileTabContent">
+        <!-- Profile Tab Content -->
+        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profileTab">
+            <form method="post" asp-action="Profile" id="profileForm" class="profile-form needs-validation" novalidate>
+                <div asp-validation-summary="All" class="alert alert-danger d-none"></div>
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="UserId" value="@Model.UserId" />
+
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label class="form-label" for="Email">Email</label>
+                    <input type="email" asp-for="Email" class="form-control" readonly
+                           aria-describedby="emailHelp">
+                    <div class="valid-feedback">Looks good!</div>
+                    <div class="invalid-feedback">Please provide a valid email.</div>
+                </div>
+
+                <!-- Full Name Field -->
+                <div class="mb-3">
+                    <label class="form-label" for="FullName">Full Name</label>
+                    <input type="text" asp-for="FullName" class="form-control"
+                           required aria-describedby="nameHelp">
+                    <div class="valid-feedback">Looks good!</div>
+                    <div class="invalid-feedback">Please provide your full name.</div>
+                </div>
+
+                <!-- Address Field -->
+                <div class="mb-3">
+                    <label class="form-label">Area</label>
+                    <select asp-for="Area" class="form-select" required>
+                        <option value="">Select Your Area</option>
+                        <option>Doha</option>
+                        <option>Al Wakrah</option>
+                        <option>Al Rayyan</option>
+                        <option>Umm Salal</option>
+                        <option>Al Khor</option>
+                        <option>Lusail</option>
+                        <option>The Pearl</option>
+                    </select>
+                    <div class="invalid-feedback">Please select your area</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Street Address</label>
+                    <input type="text" asp-for="StreetAddress" class="form-control"
+                           placeholder="Building No, Street Name, Landmark" required>
+                    <div class="invalid-feedback">Please provide detailed street address</div>
+                </div>
+
+                <!-- Phone Number Field -->
+                <div class="mb-3">
+                    <label class="form-label">Contact Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text">+974</span>
+                        <input type="tel" asp-for="PhoneNumber" class="form-control"
+                               placeholder="50123456" pattern="[5-7]\d{7}"
+                               title="8-digit Qatari number starting with 5,6, or 7" 
+                               required 
+                               id="PhoneNumber">
+                    </div>
+                    <small class="form-text text-muted">Example: 50123456</small>
+                    <div class="invalid-feedback">Valid Qatari number required (8 digits starting with 5/6/7)</div>
+                </div>
+
+                <!-- Newsletter Subscription -->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" asp-for="IsSubscribed"
+                           class="form-check-input" id="newsletterCheck"
+                           data-url="@Url.Action("ToggleSubscription", "Account")">
+                    <label class="form-check-label" for="newsletterCheck">
+                        Subscribe to Newsletter
+                    </label>
+                    <div class="form-text">Manage your email preferences</div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary"
+                            aria-label="Save profile changes">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+
+              
+            </form>
+        </div>
+
+        <!-- Orders Tab Content -->
+        <div class="profile-orders-tab tab-pane fade" id="orders" role="tabpanel" aria-labelledby="ordersTab">
+            @if (Model.Orders != null && Model.Orders.Any())
+            {
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    @foreach (var order in Model.Orders)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title">Order #@order.OrderId</h5>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="badge status-badge">@order.Status</span>
+                                        <small class="text-muted">@order.OrderDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("MM/dd/yyyy", new CultureInfo("en-QA"))</small>
+                                    </div>
+                                    <a asp-action="Details" asp-controller="Order"
+                                       asp-route-id="@order.OrderId"
+                                       class="btn btn-outline-primary mt-3">
+                                        <i class="fas fa-info-circle me-2"></i>View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>No orders found.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@functions {
+    int GetCompletionPercentage(ProfileViewModel model)
+    {
+        int completeFields = 0;
+        if (!string.IsNullOrEmpty(model.FullName)) completeFields++;
+        if (!string.IsNullOrEmpty(model.Area)) completeFields++;
+        if (!string.IsNullOrEmpty(model.StreetAddress)) completeFields++;
+        if (!string.IsNullOrEmpty(model.PhoneNumber)) completeFields++;
+        return (int)((completeFields / 4.0) * 100);
+    }
+}

@@ -1,0 +1,54 @@
+﻿@model LavenderLine.Models.Order
+
+@{
+    ViewData["Title"] = "Delete Order";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-danger text-white py-3">
+            <h5 class="m-0 font-weight-bold">Delete Order #@Model.OrderId</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <h5><i class="fas fa-exclamation-triangle"></i> Warning!</h5>
+                <p class="mb-0">You are about to permanently delete this order. This action cannot be undone.</p>
+            </div>
+
+            <dl class="row">
+                <dt class="col-sm-3">Order Date</dt>
+                <dd class="col-sm-9">@Model.OrderDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("f",new CultureInfo("en-QA"))</dd>
+
+                <dt class="col-sm-3">Customer</dt>
+                <dd class="col-sm-9">
+                    @if (Model.User != null)
+                    {
+                        @Model.User.FullName <span class="text-muted">(@Model.User.Email)</span>
+                    }
+                    else
+                    {
+                        @Model.GuestFullName <span class="badge bg-secondary">Guest</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-3">Total Amount</dt>
+                <dd class="col-sm-9">@Model.TotalAmount.ToString("N2") QAR</dd>
+            </dl>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="OrderId" />
+                @Html.AntiForgeryToken()
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Confirm Delete
+                    </button>
+                    <a asp-action="Details" asp-route-id="@Model.OrderId" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,271 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>AVNL Admin - Dashboard</title>
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+    <!-- Boostrap 5-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+
+
+    <link href="~/css/sb-admin-2.css" rel="stylesheet"/>
+    <link href="~/css/sb-admin-2.min.css" rel="stylesheet" />
+</head>
+
+<body id="page-top">
+
+
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="spinner-shop"></div>
+    </div>
+
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-action="Index" asp-controller="AdminDashboard">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-laugh-wink"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">AvenderLine Admin</div>
+            </a>
+
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item">
+                <a class="nav-link @(ViewBag.ActiveLink == "Dashboard" ? "active" : "")" asp-action="Index" asp-route-name="admin" asp-controller="AdminDashboard">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>  
+            <li class="nav-item">
+                <a class="nav-link @(ViewBag.ActiveLink == "Index" ? "active" : "")" asp-action="Index" asp-controller="Home">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <div class="sidebar-heading">Interface</div>
+
+            <li class="nav-item">
+                <a class="nav-link @(ViewBag.ActiveLink == "Users" ? "active" : "")" asp-action="Index" asp-route-name="admin" asp-controller="AdminAccount">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseUtilities" aria-expanded="false" aria-controls="collapseUtilities">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>Contents</span>
+                </a>
+                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-bs-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Managment</h6>
+                        <a class="collapse-item" asp-action="Index" asp-route-name="admin" asp-controller="AdminCategory">Categories</a>
+                        <a class="collapse-item" asp-action="Index" asp-route-name="admin" asp-controller="AdminProduct">Products</a>
+                        <a class="collapse-item" asp-action="Index" asp-route-name="admin" asp-controller="AdminOrder">Orders</a>
+                        <a class="collapse-item" asp-action="Index" asp-route-name="admin" asp-controller="AdminPayment">Payments</a>
+                    </div>
+                </div>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <div class="sidebar-heading">Addons</div>
+
+            <li class="nav-item">
+                <a class="nav-link" asp-action="Index" asp-route-name="admin" asp-controller="CarouselImage">
+                    <i class="fas fa-images"></i>
+                    <span>Carousels</span>
+                </a>
+            </li>  
+            <li class="nav-item">
+                <a class="nav-link" asp-action="Index" asp-route-name="admin" asp-controller="AdminInstagramPost">
+                    <i class="fab fa-instagram-square"></i>
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-action="Index" asp-route-name="admin" asp-controller="AdminPromotion">
+                    <i class="fas fa-ad"></i>
+                    <span>Promotions</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+        
+        </ul>
+        <!-- End of Sidebar -->
+        <!-- Top Navbar -->
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <ul class="navbar-nav ml-auto">
+
+
+                        <li class="nav-item dropdown no-arrow mx-1" id="notificationsDropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell fa-fw"></i>
+                                <span class="badge badge-danger badge-counter" id="notificationCount">0</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" style="min-width: 280px;">
+                                <h6 class="dropdown-header">Order Notifications</h6>
+                                <div id="notificationsList" class="overflow-hidden">
+                                    <!-- Notifications will be loaded here via AJAX -->
+                                </div>
+                                <a class="dropdown-item text-center small text-gray-500" href="#">Show All Notifications</a>
+                            </div>
+                        </li>
+
+                        <!-- Messages Dropdown -->
+                        <li class="nav-item dropdown no-arrow mx-1" id="messagesDropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-envelope fa-fw"></i>
+                                <span class="badge badge-danger badge-counter" id="messageCount">0</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" style="min-width: 280px;">
+                                <h6 class="dropdown-header">Login Messages</h6>
+                                <div id="messagesList" class="overflow-hidden">
+                                    <!-- Messages will be loaded here via AJAX -->
+                                </div>
+                                <a class="dropdown-item text-center small text-gray-500" href="#">Read All Messages</a>
+                            </div>
+                        </li>
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                @{
+                                    var fullName = User?.Identity?.IsAuthenticated == true
+                                    ? User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value
+                                    : string.Empty;
+                                }
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Welcome, @(fullName ?? "Account")</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" asp-action="Profile" asp-controller="Account">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
+                      
+                                <div class="dropdown-divider"></div>
+            
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-link text-start p-0 w-100">
+                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- End of Topbar -->
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <!-- Page Content -->
+                <div class="container-fluid">
+                    @RenderBody()
+                </div>
+            </div>
+
+
+
+            @await Html.PartialAsync("_Toast")
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; AvenderLine 2024</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+        </div>
+    </div>
+    <!-- End of Wrapper -->
+
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Logout</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to logout?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="post" asp-action="Logout" asp-controller="Account" id="logoutForm">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap core JavaScript-->
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/countdown.js"></script>
+    <script src="~/js/sb-admin-2.js" asp-append-version="true"></script> 
+    <script src="~/js/toast.js"></script>
+  
+    <style>
+      
+   
+</style>
+    <!-- Render additional scripts if needed -->
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

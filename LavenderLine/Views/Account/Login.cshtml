@@ -1,0 +1,119 @@
+﻿@model LoginViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml";
+    ViewData["Title"] = "Login";
+}
+
+
+<div class="auth-container d-flex align-items-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="auth-card">
+                    <div class="row g-0">
+                        <!-- Left Column -->
+                        <div class="col-lg-5 card-left">
+                            <div class="text-center mb-4">
+                                <svg class="lock-animation" width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 15V17M12 7V13M12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <h2 class="text-center mb-3">Welcome Back!</h2>
+                            <p class="text-center opacity-75">Sign in to continue your shopping</p>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-lg-7">
+                            <div class="p-5">
+                                <h3 class="form-title d-none d-lg-block">Account Login</h3>
+
+                                <!-- Social Login -->
+                                <div class="d-flex flex-row align-items-center justify-content-center mb-3">
+                                    <form asp-action="GoogleLogin" asp-route-returnUrl="@Model.ReturnUrl" method="get">
+                                        <button name="provider" type="submit" title="Login using Google" value="Google"
+                                                class="google-login-btn">
+                                            <img src="~/svgs/google.svg"/>
+                                           Sign with Google
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div class="divider my-4">
+                                    <p class="text-center fw-bold mx-3 mb-0">Or</p>
+                                </div>
+
+                                <!-- Login Form -->
+                                <form asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="auth-form">
+                                    @Html.AntiForgeryToken()
+                                    <div asp-validation-summary="All" class="text-danger mb-3 message-animation" style="display: none;"></div>
+
+                                    <!-- Email Input -->
+                                    <div class="password-field">
+                                        <input type="email" asp-for="Email" id="emailInput" class="form-control form-control-md"
+                                               placeholder="Enter a valid email address" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+
+                                    <!-- Password Input -->
+                                    <div class="password-field">
+                                       
+                                        <input type="password" asp-for="Password" class="form-control form-control-md"
+                                               placeholder="Enter password" />
+                                        <span class="password-toggle" id="togglePassword">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                <path d="M12 5C17.5228 5 22 12 22 12C22 12 17.5228 19 12 19C6.47715 19 2 12 2 12C2 12 6.47715 5 12 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <span asp-validation-for="Password" class="text-danger"></span>
+                                    </div>
+
+                                    <!-- Remember Me & Forgot Password -->
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div class="form-check d-none d-lg-block">
+                                            <input class="form-check-input" asp-for="RememberMe" type="checkbox" id="RememberMe" />
+                                            <label class="form-check-label" for="RememberMe">Remember me</label>
+                                        </div>
+                                        <a href="@Url.Action("ForgotPassword", "Account")" class="text-body">Forgot password?</a>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <div class="form-group mt-4 pt-2">
+                                        <button type="submit" class="submit-btn w-100" data-action="login" aria-label="Submit login form">
+                                            Login <span class="visually-hidden">your account</span>
+                                            <svg class="ms-2" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M13 5L20 12L13 19M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <!-- Register Link -->
+                                <div class="text-center mt-4 login-link">
+                                    <p class="small mb-0">
+                                        Don't have an account? <a asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Register</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ViewData["ToastMessage"] != null)
+{
+    <div class="d-none" id="server-toast" data-type="danger" data-message="@ViewData["ToastMessage"]"></div>
+   @section Scripts
+   {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toast = document.getElementById('server-toast');
+            Toast.show(toast.dataset.type, toast.dataset.message);
+        });
+    </script>
+   }
+}

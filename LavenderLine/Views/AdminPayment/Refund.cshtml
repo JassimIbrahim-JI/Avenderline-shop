@@ -1,0 +1,38 @@
+﻿@model LavenderLine.Models.Payment
+
+@{
+    ViewData["Title"] = "Process Refund";
+    Layout = "~/Views/Shared/_LayoutAdmin.chtml";
+}
+
+<div class="container mt-4">
+    
+    <h2 class="text-bg-secondary">Process Refund for Payment ID: @Model.Id</h2>
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <form asp-action="Refund" method="post" id="refundPaymentForm">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="form-group">
+                    <label for="amount">Refund Amount (QAR):</label>
+                    <input type="number" class="form-control" name="amount" step="0.01" min="0" max="@Model.Amount" required />
+                    <small class="form-text text-muted">Max refund amount: @Model.Amount QAR</small>
+                </div>
+                <button type="submit" class="btn btn-danger">Process Refund</button>
+
+            
+            </form>
+            <a asp-action="Index" asp-controller="AdminPayment" class="btn btn-primary">Cancel</a>
+        </div>
+    </div>
+ 
+</div>
+
+    @section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('#refundPaymentForm').on('submit', function () {
+                $('#loading-overlay').show();
+            });
+        });
+    </script>
+    }

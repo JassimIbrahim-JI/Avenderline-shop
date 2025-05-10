@@ -1,0 +1,86 @@
+﻿@model IEnumerable<WishlistItemDto>
+
+
+   <style>
+
+.divider {
+    border-top: 1px solid #ddd;
+    margin: 1rem 0;
+}
+
+.favorite-icon {
+    position: absolute;
+    top: 17px;
+    right: 20px;
+    color: #9c4e05;
+    font-size: 1.2em;
+    opacity: 1;
+    cursor: pointer;
+}
+
+.favorite-icon:focus,
+.favorite-icon:active {
+    box-shadow: none !important;
+    outline: none !important;
+    border: none !important;
+}
+
+   </style>
+    
+
+
+<div class="wishlist-container">
+    @if(Model.Any())
+    {
+        @foreach (var item in Model)
+        {
+            <div class="wishlist-item mb-3 p-1 border-bottom" data-product-id="@item.ProductId">
+                <div class="row align-items-center">
+                    <div class="col-3">
+                        <img src="@item.ImageUrl" alt="@item.Name" class="img-fluid rounded">
+                    </div>
+                    <div class="col-6">
+                        <h5>@item.Name</h5>
+                        <div class="price-container">
+                     
+                            <span class="text-danger fw-bold">QR @item.Price.ToString("N0", new CultureInfo("en-QA"))</span>
+                        </div>
+                    </div>
+
+                    <div class="col-3 text-end">
+                        <form method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn favorite-icon remove-from-wishlist-btn" data-product-id="@item.ProductId">
+                                <i class="fas fa-heart" title="Remove from Favorite"></i>
+                            </button>
+                        </form>
+                    </div>
+
+
+                </div>
+            </div>
+
+        }
+     
+        <div class="mx-auto w-100 text-center">
+            <a href="@Url.Action("Index", "Wishlist")" class="btn-wishlist btn-sm">
+                View Wishlist
+            </a>
+        </div>
+
+    } 
+    else
+    {
+
+        <div class="text-center py-5">
+            <i class="fas fa-heart fa-4x text-muted mb-4"></i>
+            <h4 class="mb-3">Your wishlist is empty</h4>
+            <a href="@Url.Action("Shop", "Home")" class="btn btn-secondary btn-lg">
+                Start Shopping <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    }
+
+
+</div>
+

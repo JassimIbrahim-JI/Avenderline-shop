@@ -1,0 +1,115 @@
+﻿@using LavenderLine.ViewModels.Users
+@model IEnumerable<UserViewModel>
+
+@{
+    ViewData["Title"] = "Users";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+  
+}
+
+
+<div class="container mt-5">
+    <h2 class="text-bg-secondary">Users</h2>
+    @if (!Model.Any())
+    {
+        <div class="row justify-content-center alert alert-warning" role="alert">
+            No users found.
+        </div>
+    }
+    else
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>@user.Email</td>
+                                    <td>@user.PhoneNumber</td>
+                                    <td>@user.Role</td>
+                                    <td>
+                                        <a asp-route-name="admin" asp-action="Details" asp-controller="AdminAccount" asp-route-id="@user.Id" class="btn btn-info btn-sm @(ViewBag.ActiveAction == "Details" ? "active" : "")">Details</a>
+                                        <a asp-route-name="admin" asp-action="Edit" asp-controller="AdminAccount" asp-route-id="@user.Id" class="btn btn-warning btn-sm @(ViewBag.ActiveAction == "Edit" ? "active" : "")">Edit</a>
+                                        <a class="btn btn-danger btn-sm"
+                                           data-toggle="modal"
+                                           data-target="#confirmDeleteModal"
+                                           data-user-id="@user.Id"
+                                           data-user-name="@user.FullName">
+                                            Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Section -->
+                <div>
+                    <nav>
+                        <ul class="pagination justify-content-start">
+                            <li class="page-item @(ViewBag.PageNumber == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-pageNumber="1" asp-route-pageSize="@ViewBag.PageSize">First</a>
+                            </li>
+
+                            @for (int i = 1; i <= ViewBag.TotalCount; i++)
+                            {
+                                <li class="page-item @(i == ViewBag.PageNumber ? "active" : "")">
+                                    <a class="page-link" asp-action="Users" asp-route-pageNumber="@i" asp-route-pageSize="@ViewBag.PageSize">@i</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(ViewBag.PageNumber == ViewBag.TotalCount ? "disabled" : "")">
+                                <a class="page-link" asp-action="Users" asp-route-pageNumber="@ViewBag.TotalCount" asp-route-pageSize="@ViewBag.PageSize">Last</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+            </div>
+        </div>
+    }
+    
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong id="userName"></strong>?
+                <form id="deleteForm" method="post">
+                    @* Hidden input to store user ID *@
+                    <input type="hidden" name="userId" id="userId" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+

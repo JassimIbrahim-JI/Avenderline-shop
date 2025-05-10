@@ -1,0 +1,283 @@
+﻿@using LavenderLine.Enums.Order
+@using LavenderLine.ViewModels.Orders
+@model OrderListViewModel
+@{
+    ViewData["Title"] = "Orders";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <!-- Filter Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light py-3">
+            <h5 class="m-0 font-weight-bold text-primary">Filters</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3 align-items-end">
+                <input type="hidden" name="sortBy" value="@Model.CurrentSort" />
+                <input type="hidden" name="sortDirection" value="@Model.CurrentDirection" />
+
+                <div class="col-md-3">
+                    <label class="form-label">Customer Name</label>
+                    <input type="text" class="form-control"
+                           name="userName"
+                           value="@Model.FilterParams.UserName"
+                           placeholder="Enter customer name">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" class="form-control"
+                           name="startDate"
+                           value="@(Model.FilterParams.StartDate?.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd",new CultureInfo("en-QA")))">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" name="status">
+                        <option value="">All Statuses</option>
+                        @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                        {
+                            <option value="@status"
+                                    selected="@(Model.FilterParams.Status == status)">
+                                @status
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="fas fa-sync"></i> Clear Filters
+                    </a>
+                    <a asp-action="ExportToPdf"
+                       asp-controller="Pdf"
+                       asp-all-route-data="@(new Dictionary<string,string> {
+       { "userName", Model.FilterParams.UserName },
+       { "startDate", Model.FilterParams.StartDate?.InZone(QatarDateTime.QatarZone)
+                           .LocalDateTime.ToString("yyyy-MM-dd", new CultureInfo("en-QA")) },
+       { "status", Model.FilterParams.Status?.ToString() }
+   })"
+                       class="btn btn-danger">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </a>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @foreach(var order in Model.Orders)
+    {
+        if (order.OrderItems.Any(item => !string.IsNullOrEmpty(item.SpecialRequest)))
+        {
+
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Special Request Alert!</strong> Order #@order.OrderId.ToString("D8")
+                has a special request.
+                <a asp-action="Details" asp-route-id="@order.OrderId" class="alert-link">
+                    View Details
+                </a>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+    }
+
+    <!-- Orders Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="m-0 font-weight-bold">Order Management</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>
+                                <a asp-action="Index"
+                                   asp-all-route-data="@GetSortRouteData("OrderId")">
+                                    Order ID @Html.Raw(GetSortIcon("OrderId"))
+                                </a>
+                            </th>
+                            <th>Customer</th>
+                            <th>
+                                <a asp-action="Index"
+                                   asp-all-route-data="@GetSortRouteData("TotalAmount")">
+                                    Total (QAR) @Html.Raw(GetSortIcon("TotalAmount"))
+                                </a>
+                            </th>
+                            <th>Status</th>
+                            <th>
+                                <a asp-action="Index"
+                                   asp-all-route-data="@GetSortRouteData("OrderDate")">
+                                    Date @Html.Raw(GetSortIcon("OrderDate"))
+                                </a>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.Orders)
+                        {
+                          
+                            <tr>
+                                <td>#@order.OrderId.ToString("D8")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(order.UserId))
+                                    {
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle me-2"></i>
+                                            @order.User?.FullName
+                                            @if (!string.IsNullOrEmpty(order.User?.Email))
+                                            {
+                                                <small class="text-muted ms-2">@order.User.Email</small>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-clock me-2"></i>
+                                            @order.GuestFullName
+                                            @if (!string.IsNullOrEmpty(order.GuestEmail))
+                                            {
+                                                <small class="text-muted ms-2">@order.GuestEmail</small>
+                                            }
+                                            <span class="badge bg-secondary ms-2">Guest</span>
+                                        </div>
+                                    }
+                                </td>
+                                <td>@order.TotalAmount.ToString("N2") QAR</td>
+                                <td>
+                                    <span class="badge @GetStatusBadge(order.Status) rounded-pill p-2">
+                                        <i class="fas @GetStatusIcon(order.Status) me-1"></i>
+                                        @order.Status
+                                    </span>
+                                </td>
+                                <td>@order.OrderDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("dd MMM yyyy hh:mm tt",new CultureInfo("en-QA"))</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@order.OrderId"
+                                           class="btn btn-sm btn-outline-primary rounded-3"
+                                           data-bs-toggle="tooltip" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@order.OrderId"
+                                           class="btn btn-sm btn-outline-warning rounded-3"
+                                           data-bs-toggle="tooltip" title="Edit Order">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                  
+                                        <a asp-action="Delete" asp-route-id="@order.OrderId"
+                                        data-bs-toggle="tooltip" title="Delete Order" 
+                                        class="btn btn-sm btn-outline-danger rounded-3">
+                                            <i class="fas fa-trash"></i> 
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@i"
+                               asp-all-route-data="@GetPaginationRouteData(i)">
+                                @i
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+
+            // Toast notifications
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const error = urlParams.get('error');
+            if (success) Toast.show('success', success);
+            if (error) Toast.show('danger', error);
+
+        
+        });
+    </script>
+}
+
+@functions {
+    public string GetStatusBadge(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Processing => "bg-info text-white",
+            OrderStatus.Delivered => "bg-success text-white",
+            OrderStatus.Cancelled => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+    }
+
+    string GetSortIcon(string columnName)
+    {
+        if (Model.CurrentSort != columnName) return "";
+        return Model.CurrentDirection == "asc"
+            ? "<i class='fas fa-sort-up'></i>"
+            : "<i class='fas fa-sort-down'></i>";
+    }
+    
+    public string GetStatusIcon(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "fa-clock",
+            OrderStatus.Processing => "fa-cog",
+            OrderStatus.Delivered => "fa-check-circle",
+            OrderStatus.Cancelled => "fa-times-circle",
+            _ => "fa-question-circle"
+        };
+    }
+
+    Dictionary<string, string> GetSortRouteData(string sortBy)
+    {
+        var routeData = new Dictionary<string, string> {
+            { "sortBy", sortBy },
+            { "sortDirection", Model.CurrentSort == sortBy && Model.CurrentDirection == "asc" ? "desc" : "asc" },
+            { "userName", Model.FilterParams.UserName },
+            { "startDate", Model.FilterParams.StartDate?.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd",new CultureInfo("en-QA")) },
+            { "status", Model.FilterParams.Status?.ToString() }
+        };
+        return routeData;
+    }
+
+    Dictionary<string, string> GetPaginationRouteData(int page)
+    {
+        var routeData = new Dictionary<string, string> {
+            { "page", page.ToString() },
+            { "sortBy", Model.CurrentSort },
+            { "sortDirection", Model.CurrentDirection },
+            { "userName", Model.FilterParams.UserName },
+            { "startDate", Model.FilterParams.StartDate?.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd",new CultureInfo("en-QA")) },
+            { "status", Model.FilterParams.Status?.ToString() }
+        };
+        return routeData;
+    }
+
+}

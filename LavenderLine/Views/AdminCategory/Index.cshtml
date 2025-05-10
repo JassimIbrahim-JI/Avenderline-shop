@@ -1,0 +1,196 @@
+﻿@model IEnumerable<LavenderLine.ViewModels.Banners.CategoryViewModel>
+
+@{
+    ViewData["Title"] = "Categories";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-primary text-white py-3">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <h3 class="mb-0">Categories Management</h3>
+                </div>
+                <div class="col-6 text-end">
+                    <a asp-action="Create" class="btn btn-light">
+                        <i class="fas fa-plus me-2"></i>Create New
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="alert alert-warning" role="alert">
+                    No categories found.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Category Name</th>
+                                <th class="text-center">Image</th>
+                                <th class="text-center">Banner Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var category in Model)
+                            {
+                                <tr class="position-relative">
+                                    <td>@category.CategoryId</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                            {
+                                                <img src="@category.ImageUrl"
+                                                     alt="@category.Name"
+                                                     class="rounded-circle"
+                                                     style="width: 40px; height: 40px; object-fit: cover">
+                                            }
+                                            <span>@category.Name</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                        {
+                                            <a href="@category.ImageUrl" target="_blank"
+                                               class="btn btn-sm btn-outline-primary">
+                                                View Image
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">No Image</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="form-check d-inline-block">
+                                            <input class="form-check-input is-banner-toggle"
+                                                   type="checkbox"
+                                                   data-id="@category.CategoryId"
+                                            @(category.IsBanner ? "checked" : "")>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <a asp-action="Details" asp-route-id="@category.CategoryId"
+                                               class="btn btn-sm btn-outline-primary"
+                                               data-bs-toggle="tooltip" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@category.CategoryId"
+                                               class="btn btn-sm btn-outline-secondary"
+                                               data-bs-toggle="tooltip" title="Edit Category">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger delete-category"
+                                                    data-id="@category.CategoryId"
+                                                    data-bs-toggle="tooltip" title="Delete Category">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-4">
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(ViewBag.PageNumber == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-pageNumber="1" asp-route-pageSize="@ViewBag.PageSize">First</a>
+                            </li>
+
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == ViewBag.PageNumber ? "active" : "")">
+                                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i" asp-route-pageSize="@ViewBag.PageSize">@i</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(ViewBag.PageNumber == ViewBag.TotalPages ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-pageNumber="@ViewBag.TotalPages" asp-route-pageSize="@ViewBag.PageSize">Last</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .table thead th {
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .form-switch .form-check-input {
+        width: 2.5em;
+        height: 1.5em;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+
+            // Delete functionality remains the same
+            $('.delete-category').on('click', function () {
+                const categoryId = $(this).data('id');
+                const token = $('input[name="__RequestVerificationToken"]').val();
+
+                if (confirm('Are you sure you want to delete this category?')) {
+                    $.ajax({
+                        url: '/AdminCategory/Delete',
+                        type: 'POST',
+                        data: { id: categoryId, __RequestVerificationToken: token },
+                        success: function (response) {
+                            if (response.success) {
+                                Toast.show('success', response.message);
+                                // Remove the deleted row
+                                $(`[data-id="${categoryId}"]`).closest('tr').fadeOut();
+                            } else {
+                                Toast.show('danger', response.message);
+                            }
+                        },
+                        error: function () {
+                            Toast.show('danger', 'An error occurred while deleting the category.');
+                        }
+                    });
+                }
+            });
+
+            // Banner toggle functionality
+            $('.is-banner-toggle').change(function () {
+                const categoryId = $(this).data('id');
+                const isBanner = $(this).prop('checked');
+
+                $.post('/AdminCategory/ToggleBanner', {
+                    id: categoryId,
+                    isBanner: isBanner
+                }).done(function (response) {
+                    if (!response.success) {
+                        Toast.show('danger', response.message);
+                        $(this).prop('checked', !isBanner);
+                    }
+                });
+            });
+        });
+    </script>
+}

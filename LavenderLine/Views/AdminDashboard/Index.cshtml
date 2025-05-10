@@ -1,0 +1,302 @@
+﻿@model LavenderLine.ViewModels.Analytics.DashboardDataViewModel
+@{
+    ViewData["Title"] = "AvenderLine Dashboard";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+@if (User.Identity!.IsAuthenticated)
+{
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
+        </a>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Current Users Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Current Users
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.CurrentUsers</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Orders Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Orders
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Revenue Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Revenue
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">QR @Model.TotalPayments.ToString("N0")</div>
+                        </div>
+                        <div class="col-auto">
+                          <i class="fas fa-money-bill fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Orders Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Orders
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PendingOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Revenue Chart -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Revenue Overview</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-primary"></i> Today: QR @Model.TodayRevenue.ToString("N0")
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> Monthly: QR @Model.MonthlyRevenue.ToString("N0")
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods Chart -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Payment Methods</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="paymentMethodsChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        @foreach (var method in Model.PaymentMethodBreakdown)
+                        {
+                            <span class="mr-2">
+                                <i class="fas fa-circle text-@GetMethodColor(method.Key)"></i> @method.Key
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Row -->
+    <div class="row">
+        <!-- Recent Orders -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Orders</h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        @foreach (var order in Model.RecentOrders)
+                        {
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Order #@order.OrderId</h6>
+                                    <small>@order.OrderDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)</small>
+                                </div>
+                                <p class="mb-1">QR @order.TotalAmount.ToString("N0") - @order.Status</p>
+                                <small>@order.User?.FullName</small>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Payments -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Payments</h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        @foreach (var payment in Model.RecentPayments)
+                        {
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Payment @payment.PaymentMethod</h6>
+                                    <small>@payment.PaymentDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)</small>
+                                </div>
+                                <p class="mb-1">QR @payment.Amount.ToString("N0") - @payment.Status</p>
+                                <small>Order #@payment.OrderId</small>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Customers Row -->
+    <div class="row">
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">New Customers</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var user in Model.NewCustomers)
+                        {
+                            <div class="col-lg-3 mb-4">
+                                <div class="card border-left-info shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                    @user.FullName
+                                                </div>
+                                                <div class="text-muted small">@user.Email</div>
+                                                <div class="text-muted small">Joined: @user.CreatedAt.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-user fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <h2 class="text-gray-800 mb-4">Please log in to view this page</h2>
+        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+    </div>
+}
+
+
+@section Scripts {
+
+    <script>
+        // Revenue Chart
+        var ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Today', 'Last 7 Days', 'Current Month'],
+                datasets: [{
+                    label: 'Revenue (QAR)',
+                    data: [
+        @Model.TodayRevenue,
+        @(Model.MonthlyRevenue / 4),
+        @Model.MonthlyRevenue
+                            ],
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderWidth: 2,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Payment Methods Chart
+        var ctx2 = document.getElementById('paymentMethodsChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.PaymentMethodBreakdown.Keys)),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(Model.PaymentMethodBreakdown.Values)),
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc']
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+@functions {
+    string GetMethodColor(string method)
+    {
+        return method switch
+        {
+            "Cash" => "success",
+            "Card" => "primary",
+            _ => "secondary"
+        };
+    }
+}

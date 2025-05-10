@@ -1,0 +1,427 @@
+﻿@using System.Globalization
+@using LavenderLine.ViewModels.Carts
+@model LavenderLine.ViewModels.Actions.HomeViewModel
+@inject ICarouselImageService CarouselImageService
+
+@{
+    ViewData["title"] = "Home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var carouselImages = await CarouselImageService.GetAllImagesAsync();
+    var imageList = carouselImages.ToList();
+
+    var culture = new CultureInfo("en-QA");
+}
+
+<style>
+    .shop-btn:hover {
+        color: #fff;
+        box-shadow: 0 5px 15px rgba(138,43,226,0.3);
+    }
+</style>
+
+<!--Featured Abayas section-->
+<section class="container py-5">
+    <div class="section-title text-center mb-5">
+        <h2 class="title">Featured Abayas</h2>
+        <p class="section-subtitle">Discover our curated collection of exquisite designs</p>
+    </div>
+
+<div class="row">
+
+        <div class="col-12 col-md-3 text-center">
+            <div id="categoryBannerCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
+                <div class="carousel-inner">
+                    @if (Model.Banners != null && Model.Banners.Any())
+                    {
+                        @foreach (var banner in Model.Banners.Select((b, i) => new { Banner = b, Index = i }))
+                        {
+                            <div class="carousel-item @(banner.Index == 0 ? "active" : "")">
+                                <div class="category-card">
+                                    <div class="category-image-container">
+                                        <div class="shimmer-placeholder" aria-hidden="true"></div>
+                                        <img src="" alt="@banner.Banner.Name" data-src="@banner.Banner.ImageUrl" loading="lazy" width="600" height="900" class="category-image img-fluid">
+                                        <div class="category-text">
+                                            <h4 class="category-title">@banner.Banner.Name</h4>
+
+                                            @if (banner.Index == 0)
+                                            {
+                                                <a href="@Url.Action("Arrivals", "Home")" class="category-description">Shop Arrivals</a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("Brands", "Home")" class="category-description">Explore Collections</a>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                   
+                </div>
+             
+            </div>
+        </div>
+
+        <div class="col-12 col-md-9">
+        <ul class="nav nav-tabs justify-content-center" id="productTabs" role="tablist">
+                @foreach (var banner in Model.Banners!.Select((b, i) => new { Banner = b, Index = i }))
+                {
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link @(banner.Index == 0 ? "active" : "")"
+                           id="tab-@banner.Banner.CategoryId"
+                           data-bs-toggle="tab"
+                           href="#carousel-@banner.Banner.CategoryId"
+                           role="tab">
+                            @banner.Banner.Name 
+                        </a>
+                    </li>
+                }
+
+        </ul>
+            <div class="tab-content">
+                @foreach (var banner in Model.Banners.Select((b, i) => new { Banner = b, Index = i }))
+                {
+                    <div class="tab-pane fade @(banner.Index == 0 ? "show active" : "")"
+                         id="carousel-@banner.Banner.CategoryId"
+                         role="tabpanel">
+
+                        <div id="carousel-@banner.Banner.CategoryId-inner" class="carousel slide product-carousel">
+                            <div class="carousel-indicators">
+                                @for (int i = 0; i < Model.BannerProducts[banner.Banner.CategoryId].Chunk(3).Count(); i++)
+                                {
+                                    <button type="button"
+                                            data-bs-target="#carousel-@banner.Banner.CategoryId-inner"
+                                            data-bs-slide-to="@i"
+                                            class="@(i == 0 ? "active" : "")"></button>
+                                }
+                            </div>
+
+                            <div class="carousel-inner">
+                                @foreach (var chunk in Model.BannerProducts[banner.Banner.CategoryId].Chunk(3).Select((v, i) => new { Items = v, Index = i }))
+                                {
+                                    <div class="carousel-item @(chunk.Index == 0 ? "active" : "")">
+                                        <div class="row">
+                                            @foreach (var product in chunk.Items)
+                                            {
+                                                <div class="col-md-4 mb-4">
+                                                    <div class="product mx-2 p-0 mb-5">
+                                                        <div class="product-image-container position-relative @(product.Quantity < 1 ? "sold-out" : "")">
+                                                            @if (product.OriginalPrice.HasValue && product.OriginalPrice > product.Price)
+                                                            {
+                                                                <div class="badge bg-success position-absolute top-0 start-0 m-2 z-1 fs-6">
+                                                                    @((int)(100 - (product.Price / product.OriginalPrice.Value * 100)))% OFF
+                                                                    <span class="visually-hidden">Discount on </span>
+                                                                </div>
+                                                            }
+                                                            <div class="shimmer-placeholder" aria-hidden="true"></div>
+                                                            <img src=""
+                                                             alt="Image of @product.Name"
+                                                             class="img-fluid"
+                                                             loading="lazy"
+                                                                 decoding="async"
+                                                             data-src="@product.ImageUrl"
+                                                             width="400"
+                                                             height="400">
+                                                            <div class="product-overlay">
+                                                                @if (product.Quantity >= 1)
+                                                                {
+                                                                    <button class="shop-btn"
+                                                                            data-product-id="@product.ProductId"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target="#colorSizeModal-@product.ProductId">
+                                                                        <i class="fas fa-shopping-cart"></i>
+                                                                    </button>
+                                                                    <a asp-controller="Home" asp-action="Details" asp-route-id="@product.ProductId" class="quick-view-button">
+                                                                        <i class="fas fa-eye"></i> Quick View
+                                                                    </a>
+                                                                }
+                                                            </div>
+
+                                                            <div class="sold-out-label">Sold Out</div>
+                                                         
+                                                         </div>
+                                                        <label class="text-muted">@product.CategoryName</label>
+                                                        <h3 class="product-name">@product.Name</h3>
+                                                        <div class="product-price">
+                                                            @if (product.OriginalPrice.HasValue)
+                                                            {
+                                                                <span class="text-muted text-decoration-line-through me-2">@product.OriginalPrice</span>
+                                                            }
+                                                            <span class="current-price fw-bold">QR @product.Price.ToString("N0", culture)</span>
+                                                        </div>
+                                                        <i class="far fa-heart favi-icon toggle-wishlist-btn" data-product-id="@product.ProductId" title="Add to Favorites"></i>
+                                                    </div>
+                                                    <partial name="~/Views/Cart/_LengthSizeModal.cshtml" model="new ColorSizeModalViewModel {
+                                            ProductId = product.ProductId,
+                                            ProductName = product.Name,
+                                            ImageUrl = product.ImageUrl,
+                                            ProductPrice = product.Price,
+                                            AvailableSizes = product.Sizes.Select(c=>c.Trim()).ToList(),
+                                            AvailableLength = product.Lengths.Select(c=>c.Trim()).ToList(),
+                                            MaxQuantity = product.Quantity,
+                                        }" />
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Custom Carousel Controls -->
+                            <button class="d-none d-md-block product-carousel-control carousel-control-prev"
+                                    type="button"
+                                    data-bs-target="#carousel-@banner.Banner.CategoryId-inner"
+                                    data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="d-none d-md-block product-carousel-control carousel-control-next"
+                                    type="button"
+                                    data-bs-target="#carousel-@banner.Banner.CategoryId-inner"
+                                    data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+    </div>
+</div>
+</section>
+
+<!--Avaliable Products section-->
+<section class="shop-page text-center mt-2">
+<div class="container py-5 px-3">
+   <div class="section-title text-center mb-5">
+            <h2 class="title">Available Products</h2>
+            <p class="section-subtitle">Explore our latest collection of traditional wear</p>
+        </div>
+
+  <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                @foreach (var product in Model.ActiveProducts.Take(6)) 
+                {
+           
+              <div class="col-md-4 mb-4">
+                <div class="product mx-2 p-0 mb-5">
+                  <div class="product-image-container position-relative @(product.Quantity < 1 ? "sold-out" : "")">
+                        @if (product.OriginalPrice.HasValue && product.OriginalPrice > product.Price)
+                            {
+                                <div class="badge bg-success position-absolute top-0 start-0 m-2 z-1 fs-6">
+                                        @((int)(100 - (product.Price / product.OriginalPrice.Value * 100)))% OFF
+                                    <span class="visually-hidden">Discount on </span>
+                                </div>
+                            }
+                                
+                      <div class="shimmer-placeholder" aria-hidden="true"></div>
+                         
+                     <img src=""
+                                alt="Image of @product.Name"
+                                class="img-fluid"
+                                width="400"
+                                loading="lazy"
+                                decoding="async"
+                                data-src="@product.ImageUrl"
+                                height="400">
+
+                        <div class="product-overlay">
+                            @if (product.Quantity >= 1)
+                            {
+                                <button class="shop-btn"
+                                        data-product-id="@product.ProductId"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#colorSizeModal-@product.ProductId">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
+                                <a asp-controller="Home" asp-action="Details" asp-route-id="@product.ProductId" class="quick-view-button">
+                                    <i class="fas fa-eye"></i> Quick View
+                                </a>
+
+                            }
+                        </div>
+
+                        <div class="sold-out-label">Sold Out</div>
+
+                    </div>
+                    <label class="text-muted">@product.CategoryName</label>
+                    <h3 class="product-name">@product.Name</h3>
+                    <div class="product-price">
+                        @if (product.IsOnSale)
+                        {
+                            <span class="text-muted text-decoration-line-through me-2">@product.OriginalPrice</span>
+                        }
+
+                       <span class="current-price fw-bold">QR @product.Price.ToString("N0", culture)</span>
+                    </div>
+                    <i class="far fa-heart favi-icon toggle-wishlist-btn" data-product-id="@product.ProductId" title="Add to Favorites"></i>
+                </div>
+            </div>
+
+                <partial name="~/Views/Cart/_LengthSizeModal.cshtml" model="new ColorSizeModalViewModel {
+                ProductId = product.ProductId,
+                ProductName = product.Name,
+                ImageUrl = product.ImageUrl,
+                ProductPrice = product.Price,
+                AvailableSizes = product.Sizes.Select(c=>c.Trim()).ToList(),
+                AvailableLength = product.Lengths.Select(c=>c.Trim()).ToList(),
+                MaxQuantity = product.Quantity,
+                }" />
+
+                }
+                   
+            </div>
+
+            <!-- Load More Button -->
+            <div class="text-center">
+                    <a href="@Url.Action("Shop", "Home")" class="btn btn-primary btn-lg" title="Discover Our Collection">
+                    Discover More
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+
+
+
+<!-- Promotion Section -->
+<section class="container my-5">
+    @if (Model.CurrentPromotion != null)
+    {
+        <div class="row align-items-center alert alert-warning p-4 rounded shadow-sm" role="alert">
+            <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
+                <h2 class="promotion-title fw-bold">
+                    <span class="animated-text">@Model.CurrentPromotion.Title</span>
+                </h2>
+                <div class="title-underline"></div>
+                <p class="fs-5 text-muted">
+                    @Model.CurrentPromotion.PromotionText
+                    <span class="bg-danger p-2 text-white rounded">
+                        @Model.CurrentPromotion.DiscountPercentage% off
+                    </span>
+                    on selected items. Hurry up!
+                </p>
+
+                <div class="promotion-badges mb-3">
+                    <span class="badge">New Arrival</span>
+                    <span class="badge bg-danger">Limited Time</span>
+                    <span class="badge bg-success">Best Seller</span>
+                </div>
+                <div class="mb-4 countdown-timer" data-enddate="@Model.CurrentPromotion.EndDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("o", new CultureInfo("en-QA"))">
+                    <div class="bg-dark text-white rounded text-center">
+                        <span id="hoursValue" class="fw-bold">00</span>
+                        <span class="text-uppercase text-muted">h</span>
+                    </div>
+                    <div class="bg-dark text-white rounded text-center">
+                        <span id="minutesValue" class="fw-bold">00</span>
+                        <span class="text-uppercase text-muted">m</span>
+                    </div>
+                    <div class="bg-dark text-white rounded text-center">
+                        <span id="secondsValue" class="fw-bold">00</span>
+                        <span class="text-uppercase text-muted">s</span>
+                    </div>
+                </div>
+                <a href="@Url.Action("Details", "Home", new { id = Model.CurrentPromotion.ProductId })" class="btn promotion-btn">
+                    Shop Now
+                </a>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="product-image-wrapper">
+                    <div class="discount-tag">
+                        @Model.CurrentPromotion.DiscountPercentage% OFF
+                    </div>
+                    <div class="product p-0 mb-5 mx-2">
+                        <div class="product-image-promotion">
+                            <img src="@Model.CurrentPromotion.Product?.ImageUrl" alt="@Model.CurrentPromotion.Product?.Name" class="img-fluid promotion-image rounded shadow">
+
+
+                        </div>
+                        <label class="text-muted mt-2">abayas</label>
+                        <h3 class="product-name">Product Name</h3>
+                        <div class="product-price">
+                            <span class="text-muted text-decoration-line-through me-2">QR600</span>
+                            <span class="text-danger fw-bold">QR400</span>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    }
+
+</section>
+
+
+<!-- Instagram Section -->
+<section class="container-fluid py-5 px-3 bg-light" id="carousel-section">
+    <div class="section-title text-center mb-5">
+        <h2 class="title">Avenderline Qatari Abayas</h2>
+        <p class="section-subtitle">Explore the elegance and beauty of traditional Qatari fashion.</p>
+        <a href="https://www.instagram.com/avenderline" target="_blank" class="instagram-icon">
+            <i class="fab fa-instagram"></i> Follow us on Instagram
+        </a>
+    </div>
+
+    @if (Model.InstagramPosts != null && Model.InstagramPosts.Any())
+    {
+        var chunks = Model.InstagramPosts.Chunk(3).ToList();
+
+        <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                @for (int chunkIndex = 0; chunkIndex < chunks.Count; chunkIndex++)
+                {
+                    var group = chunks[chunkIndex];
+                    <div class="carousel-item @(chunkIndex == 0 ? "active" : "")">
+                        <div class="row">
+                            @for (int i = 0; i < group.Count(); i++)
+                            {
+                                var post = group[i];
+                                <div class="col-12 col-md-4 mb-4 @(i > 0 ? "d-none d-md-block" : "")">
+                                    <div class="image-card">
+                                        <div class="image-container position-relative">
+                                            <img src="@post.ImageUrl" alt="@post.Caption" class="img-fluid">
+                                            <div class="caption position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center text-center">
+                                                <a href="@post.PostUrl" target="_blank" class="text-white text-decoration-none">
+                                                    @if (!string.IsNullOrEmpty(post.Hashtag))
+                                                    {
+                                                        <span class="hashtag d-block">@post.Hashtag</span>
+                                                    }
+                                                    <span>@post.Caption</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (chunks.Count > 1)
+            {
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-center">No Instagram posts available.</p>
+    }
+</section>
+

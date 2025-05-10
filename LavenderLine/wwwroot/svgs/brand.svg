@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" style="background-color: #8A2BE2">
+  <path d="M0 50 Q150 100 300 50" 
+        stroke="#ffffff" 
+        fill="none" 
+        stroke-width="2"/>
+  <text x="50%" 
+        y="60%" 
+        text-anchor="middle" 
+        fill="#ffffff" 
+        font-family="Roboto ,sans-serif" 
+        font-size="40">
+    Avenderline
+  </text>
+</svg>

@@ -1,0 +1,43 @@
+﻿@model Promotion
+
+
+@{
+    ViewData["Title"] = "Edit - Promotion Section";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Edit Promotion</h2>
+
+    <form asp-action="Edit" class="needs-validation" novalidate>
+        <input type="hidden" asp-for="Id" />
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Title</label>
+            <input asp-for="Title" class="form-control" required />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="PromotionText" class="form-label">Title</label>
+            <input asp-for="PromotionText" class="form-control" required />
+            <span asp-validation-for="PromotionText" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="DiscountPercentage" class="form-label">Discount Percentage</label>
+            <input asp-for="DiscountPercentage" class="form-control" required />
+            <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="StartDate" class="form-label">Start Date</label>
+            <input asp-for="StartDate" type="datetime-local" class="form-control" required />
+            <span asp-validation-for="StartDate" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="EndDate" class="form-label">End Date</label>
+            <input asp-for="EndDate" type="datetime-local" class="form-control" required />
+            <span asp-validation-for="EndDate" class="text-danger"></span>
+        </div>
+      
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>

@@ -1,0 +1,266 @@
+﻿@using LavenderLine.Enums.Order
+@model Order
+
+@{
+   ViewData["Title"] = "Edit Order";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="m-0 font-weight-bold">Edit Order #@Model.OrderId</h5>
+        </div>
+        <div class="card-body">
+            <form id="editForm" asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="OrderId" />
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        @if (Model.UserId != null)
+                        {
+                                <label class="form-label">Customer</label>
+                                <select asp-for="UserId" class="form-select"
+                                        asp-items="@(new SelectList(ViewBag.Users, "Id", "FullName"))">
+                            </select>
+                        }
+                        else
+                        {
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Guest Information</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">Full Name</label>
+                                        <input asp-for="GuestFullName" class="form-control" />
+                                        <span asp-validation-for="GuestFullName" class="text-danger"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input asp-for="GuestEmail" class="form-control" />
+                                        <span asp-validation-for="GuestEmail" class="text-danger"></span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <label class="form-label">Phone</label>
+                                        <input asp-for="GuestPhoneNumber" class="form-control" />
+                                        <span asp-validation-for="GuestPhoneNumber" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                
+                    <div class="col-md-6">
+                        <label class="form-label">Order Status</label>
+                        <select asp-for="Status" class="form-select"
+                                asp-items="Html.GetEnumSelectList<OrderStatus>()">
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Order Items Editor -->
+                <div class="order-items-editor">
+                    <h5 class="mb-3">Order Items</h5>
+                   
+                    <button type="button" id="add-item-btn" class="btn btn-success mb-3">
+                        <i class="fas fa-plus"></i> Add Item
+                    </button>
+
+                    @if (Model.OrderItems != null && Model.OrderItems.Any())
+                    {
+                        @for (int i = 0; i < Model.OrderItems.Count; i++)
+                        {   <input type="hidden" asp-for="OrderItems[i].OrderId" />  
+                            <input type="hidden" asp-for="OrderItems[i].OrderItemId" />
+                            <input type="hidden" asp-for="OrderItems[i].Length" />
+                            <input type="hidden" asp-for="OrderItems[i].Size" />
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-5">
+                                            <label class="form-label">Product</label>
+                                            <select name="OrderItems[@i].ProductId" class="form-select"
+                                                    asp-for="@Model.OrderItems[i].ProductId"
+                                                    asp-items="@(new SelectList(ViewBag.Products, "ProductId", "Name"))">
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Quantity</label>
+                                            <input type="number" name="OrderItems[@i].Quantity"
+                                                   class="form-control" value="@Model.OrderItems[i].Quantity" min="1" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Price (QAR)</label>
+                                            <input type="number" name="OrderItems[@i].Price"
+                                                   class="form-control" value="@Model.OrderItems[i].Price" step="0.01" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Length</label>
+                                            <input type="text" name="OrderItems[@i].Length"
+                                                   class="form-control"
+                                                   value="@Model.OrderItems[i].Length"
+                                                   required />
+                                            <span class="text-danger"
+                                                  data-valmsg-for="OrderItems[@i].Length"></span>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Size</label>
+                                            <input type="text" name="OrderItems[@i].Size"
+                                                   class="form-control"
+                                                   value="@Model.OrderItems[i].Size"
+                                                   required />
+                                            <span class="text-danger"
+                                                  data-valmsg-for="OrderItems[@i].Size"></span>
+                                        </div>
+                                        <div class="col-md-1 d-flex align-items-end">
+                                            <button type="button" class="btn btn-danger btn-sm remove-item">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted">No items found for this order.</p>
+                    }
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a asp-action="Details" asp-route-id="@Model.OrderId"
+                       class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="deletedItemsContainer"></div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            // Form submission handler
+            $('#editForm').submit(function (e) {
+                e.preventDefault();
+                $('#loading-overlay').show();
+
+                // Debug: Log the form data
+                console.log($(this).serialize());
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: 'POST',
+                    headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $('#loading-overlay').hide();
+                            Toast.show('success', response.message);
+                            setTimeout(() => {
+                                window.location.href = '@Url.Action("Details", new { id = Model.OrderId })';
+                            }, 1500);
+                        } else {
+                            $('#loading-overlay').hide();
+                            Toast.show('danger', response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $('#loading-overlay').hide();
+                        const response = xhr.responseJSON;
+                        if (response && response.validationErrors) {
+                            // Clear previous errors
+                            $('.text-danger').text('');
+
+                            // Show validation errors
+                            response.validationErrors.forEach(error => {
+                                const fieldName = error.key.replace(/\[/g, '_').replace(/\]/g, '_');
+                                $(`[data-valmsg-for="${fieldName}"]`).text(error.Errors[0]);
+                            });
+                        } else {
+                            Toast.show('danger', 'Error: ' + (response?.message || error));
+                        }
+                    }
+                });
+            });
+
+            // Remove item button handler
+            $('.remove-item').click(function () {
+                var itemId = $(this).closest('.card').find('input[name$=".OrderItemId"]').val();
+                if (itemId && itemId != '0') {
+                    $('#deletedItemsContainer').append(`<input type="hidden" name="DeletedItems" value="${itemId}" />`);
+                }
+                $(this).closest('.card').remove();
+                reindexOrderItems();
+            });
+
+            // Add new item button handler
+            $('#add-item-btn').click(function () {
+                const newIndex = $('.order-items-editor .card').length;
+                const template = `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row g-3">
+                    <input type="hidden" name="OrderItems[${newIndex}].OrderId" value="@Model.OrderId" />
+                    <input type="hidden" name="OrderItems[${newIndex}].OrderItemId" value="0" />
+                        <div class="col-md-3">
+                            <label class="form-label">Product</label>
+                            <select name="OrderItems[${newIndex}].ProductId" class="form-select">
+        @foreach (var product in ViewBag.Products)
+        {
+                                        <option value="@product.ProductId"
+                                                data-price="@product.Price">@product.Name</option>
+        }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" name="OrderItems[${newIndex}].Quantity"
+                                   class="form-control" value="1" min="1" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Price (QAR)</label>
+                            <input type="number" name="OrderItems[${newIndex}].Price"
+                                   class="form-control" value="" step="0.01" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Length</label>
+                            <input type="text" name="OrderItems[${newIndex}].Length"
+                                   class="form-control" required />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Size</label>
+                            <input type="text" name="OrderItems[${newIndex}].Size"
+                                   class="form-control" required />
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+                $('.order-items-editor').append(template);
+
+                // Rebind event for the new remove button
+                $('.remove-item').last().click(function () {
+                    $(this).closest('.card').remove();
+                    reindexOrderItems();
+                });
+            });
+
+            // Function to reindex order items after removal
+            function reindexOrderItems() {
+                let index = 0;
+                $('.order-items-editor .card').each(function () {
+                    $(this).find('input, select').each(function () {
+                        const $el = $(this);
+                        const name = $el.attr('name')
+                            .replace(/OrderItems\[\d+\]/g, `OrderItems[${index}]`);
+                        $el.attr('name', name);
+                    });
+                    index++;
+                });
+            }
+        });
+    </script>
+}

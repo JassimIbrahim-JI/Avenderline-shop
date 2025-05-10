@@ -1,0 +1,26 @@
+﻿@using LavenderLine
+@using LavenderLine.Models
+@using System.Globalization
+@using LavenderLine.Data
+@using LavenderLine.DTO
+@using LavenderLine.Services
+@using LavenderLine.ViewModels
+@using Microsoft.AspNetCore.Antiforgery
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using LavenderLine.ViewModels.Actions
+@using LavenderLine.ViewModels.Wishlists
+
+
+
+@inject SignInManager<ApplicationUser> signInManager
+@inject ICartService CartService
+@inject IWishlistService _wishlistService
+@inject ICarouselImageService CarouselImageService
+@inject IProductService productService
+@inject IAntiforgery Antiforgery
+
+
+
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

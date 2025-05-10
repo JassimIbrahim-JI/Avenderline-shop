@@ -1,0 +1,50 @@
+﻿@using System.Globalization
+@model List<LavenderLine.Models.Payment>
+
+@{
+    ViewData["Title"] = "Payment History";
+    var qatariCulture = new CultureInfo("ar-QA");
+}
+
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+
+    <a href="@Url.Action("Index", "AdminDashboard")" class="btn btn-secondary mb-3">Back</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Payment ID</th>
+                <th>Order ID</th>
+                <th>Amount</th>
+                <th>Refunded Amount</th>
+                <th>Payment Date</th>
+                <th>Status</th>
+                <th>Payment Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var payment in Model)
+                {
+                    <tr>
+                        <td>@payment.Id</td>
+                        <td>@payment.OrderId</td>
+                        <td>QR @payment.Amount.ToString("N0")</td>
+                        <td>QR @payment.RefundedAmount.ToString("N0")</td>
+                        <td>@payment.PaymentDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToDateTimeUnspecified().ToString("g", new CultureInfo("en-QA"))</td>
+                        <td>@payment.Status.ToString()</td>
+                        <td>@payment.PaymentMethod</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center">No payment history found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

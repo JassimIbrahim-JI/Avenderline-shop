@@ -1,0 +1,164 @@
+﻿
+@{
+    ViewData["Title"] = "CartItems";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+
+    .shop-btn {
+        transform: translateY(0);
+    }
+
+    .shop-btn:hover {
+        transform: translateY(-2px);
+        color: #fff;
+        box-shadow: 0 5px 15px rgba(138,43,226,0.3);
+    }
+
+
+    .cart-item {
+        transition: all 0.2s ease;
+        border: 1px solid #f0f0f0 !important;
+    }
+
+    .cart-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .color-indicator {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .remove-item-btn{
+        transition: transform 0.2s ease;
+    }
+
+    .remove-item-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .bg-light-hover:hover {
+        background-color: #f8f9fa !important;
+    }
+
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+
+    @@media (max-width: 768px) {
+        .cart-item {
+            padding: 1rem !important;
+        }
+
+        .remove-item-btn {
+            padding: 0.5rem !important;
+        }
+    }
+</style>
+
+<div id="cart-items-index" class="container py-4" aria-live="polite">
+    <div class="bg-white rounded-4 shadow-sm p-3 p-md-4">
+        @if (Model.Items.Count > 0)
+        {
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0">Your Shopping Cart <span class="text-muted fs-5">(@Model.Items.Count items)</span></h2>
+                <a href="@Url.Action("Shop", "Home")" class="btn btn-link text-decoration-none">
+                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                </a>
+            </div>
+
+            @foreach (var item in Model.Items)
+            {
+                <div class="cart-item mb-3 border-0 rounded-3 p-3 bg-light-hover transition-all" data-product-id="@item.ProductId" data-price="@item.Price" data-quantity="@item.Quantity">
+                    <div class="row g-3 align-items-start">
+                        <!-- Product Image -->
+                        <div class="col-12 col-md-2">
+                            <div class="ratio ratio-1x1 bg-light rounded-3 overflow-hidden">
+                                <img src="@item.ImageUrl" class="img-fluid object-fit-cover" alt="@item.Name">
+                            </div>
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="col-12 col-md-7">
+                            <div class="d-flex flex-column h-100">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="mb-1 fw-bold fs-5">@item.Name</h6>
+                                    <div class="text-danger fs-5">QR @item.Price.ToString("N0")</div>
+                                </div>
+
+                                <div class="mt-2 d-flex gap-2 align-items-center">
+                                
+                                    <span class="text-muted">@item.Size • @item.Length</span>
+                                </div>
+
+                                <div class="mt-2">
+                                    <span class="text-muted">Quantity:</span>
+                                    <span class="fw-medium">@item.Quantity</span>
+                                </div>
+
+                                <!-- Special Request -->
+                                <div class="mt-3">
+                                    <label class="form-label small fw-medium text-muted">Special Request</label>
+                                    <textarea name="SpecialRequest"
+                                              class="form-control form-control-sm border rounded-2"
+                                              rows="2"
+                                              maxlength="200"
+                                              placeholder="Add special instructions (max 200 characters)...">@item.SpecialRequest</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Remove Button -->
+                        <div class="col-12 col-md-3 text-md-end">
+                            <form class="remove-item-form d-inline-block" data-product-id="@item.ProductId">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ProductId" value="@item.ProductId" />
+                                <input type="hidden" name="Length" value="@item.Length" />
+                                <input type="hidden" name="Size" value="@item.Size" />
+                                <button type="submit" class="btn btn-link text-danger remove-item-btn p-2">
+                                    <i class="fas fa-trash-alt fa-sm"></i>
+                                    <span class="d-none d-md-inline ms-1">Remove</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Total & Checkout -->
+            <div class="border-top pt-4 mt-4">
+                <div class="d-flex justify-content-end">
+                    <div class="text-end">
+                        <div class="h4 mb-3">
+                            Total: <span class="text-dark" id="grand-total">QR @Model.Total.ToString("N0", new CultureInfo("en-QA"))</span>
+                        </div>
+                        <a href="@Url.Action("Checkout", "Order")" class="btn shop-btn btn-lg px-5 py-3">
+                            Proceed to Checkout <i class="fas fa-lock ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-shopping-cart fa-4x text-primary opacity-25"></i>
+                </div>
+                <h3 class="h4 mb-3">Your Cart Feels Lonely</h3>
+                <p class="text-muted mb-4">Start adding items to make it happy!</p>
+                <a href="@Url.Action("Shop", "Home")" class="btn btn-secondary px-5 py-3">
+                    Start Shopping <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        }
+    </div>
+</div>

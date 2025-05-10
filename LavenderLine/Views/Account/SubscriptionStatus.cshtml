@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Subscription Status";
+    var message = TempData["SubscriptionMessage"] as string ?? "No status available.";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h2>@ViewData["Title"]</h2>
+            <p class="lead">@message</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                Go to Home
+            </a>
+        </div>
+    </div>
+</div>

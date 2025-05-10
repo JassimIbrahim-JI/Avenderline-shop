@@ -1,0 +1,120 @@
+﻿@using LavenderLine.Enums.Order
+@model Order
+
+@{
+    ViewData["Title"] = $"Order Details - {Model.OrderId}";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<style>
+    .special-request {
+        color: black;
+    }
+
+    .no-request {
+        color: red;
+    }
+</style>
+
+<div class="container-fluid px-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="m-0 font-weight-bold">Order #@Model.OrderId</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Customer Information</h5>
+                    <dl class="row">
+                        @if (Model.UserId != null)
+                        {
+                            <dt class="col-sm-4">Registered User</dt>
+                            <dd class="col-sm-8">@Model.User.FullName</dd>
+                            <dt class="col-sm-4">Email</dt>
+                            <dd class="col-sm-8">@Model.User.Email</dd>
+                            <dt class="col-sm-4">Phone</dt>
+                            <dd class="col-sm-8">@Model.User.PhoneNumber</dd>
+                        }
+                        else
+                        {
+                            <dt class="col-sm-4">Guest Name</dt>
+                            <dd class="col-sm-8">@Model.GuestFullName</dd>
+                            <dt class="col-sm-4">Email</dt>
+                            <dd class="col-sm-8">@Model.GuestEmail</dd>
+                            <dt class="col-sm-4">Phone</dt>
+                            <dd class="col-sm-8">@Model.GuestPhoneNumber</dd>
+                        }
+                        <dt class="col-sm-4">Order Date</dt>
+                        <dd class="col-sm-8">@Model.OrderDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("f", new CultureInfo("en-QA"))</dd>
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge @GetStatusBadge(Model.Status)">
+                                @Model.Status
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+                 @{
+                  var FullAddress = $"{Model.User?.Area}, {Model.User?.StreetAddress}";
+                 }
+                <div class="col-md-6">
+                    <h5 class="mb-3">Shipping Address</h5>
+                    <p class="text-muted">
+                        @(Model.UserId != null ? FullAddress : Model.GuestAddress)
+                    </p>
+                </div>
+            </div>
+
+            <h5 class="mt-4">Order Items</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Special Request</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <tr>
+                                <td>@item.Product.Name</td>
+                                <td>@item.Quantity</td>
+                                <td class="@(string.IsNullOrEmpty(item.SpecialRequest) ? "no-request" : "special-request")">
+                                    @(string.IsNullOrEmpty(item.SpecialRequest)
+                                        ? Html.Raw("<i class='fas fa-exclamation-triangle'></i> No Special Request")
+                                        : item.SpecialRequest)
+                                </td>
+                                <td>@item.Price.ToString("C")</td>
+                                <td>@((item.Price * item.Quantity).ToString("C"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="text-end mt-4">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Orders
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@functions {
+    public string GetStatusBadge(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning",
+            OrderStatus.Processing => "bg-info",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Cancelled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+ }

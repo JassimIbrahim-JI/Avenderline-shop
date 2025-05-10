@@ -1,0 +1,170 @@
+﻿@using LavenderLine.Enums.Order
+@using LavenderLine.ViewModels.Orders
+@model OrderIndexViewModel
+@{
+    ViewData["Title"] = "Order History";
+    Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+}
+
+
+<style>
+    .order-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        border-radius: 15px;
+    }
+
+        .order-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+    .order-status .badge {
+        font-size: 0.9rem;
+        padding: 0.5em 0.8em;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="order-history-header mb-5">
+        <h1 class="display-5 fw-bold mb-3">Order History</h1>
+
+        <div class="row g-3">
+            <!-- Search Box -->
+            <div class="col-md-6">
+                <form asp-action="Index" method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control"
+                               name="search"
+                               placeholder="Search orders..."
+                               value="@Model.SearchQuery">
+                        <button class="btn search-order-btn" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        
+                    </div>
+                </form>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="col-md-6">
+                <div class="status-filter">
+                    <form asp-action="Index" method="get">
+                        <div class="input-group">
+                            <select class="form-select" name="status"
+                                    onchange="this.form.submit()">
+                                <option value="">All Statuses</option>
+                                @foreach (var status in Enum.GetValues(typeof(OrderStatus)))
+                                {
+                                    <option value="@status"
+                                            selected="@(Model.SelectedStatus?.Equals(status))">
+                                        @status
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        @Html.Hidden("page", Model.CurrentPage)
+                        @Html.Hidden("search", Model.SearchQuery)
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders List -->
+    @if (!Model.Orders.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-box-open fa-2x mb-3"></i>
+            <h4>No orders found</h4>
+        </div>
+    }
+    else
+    {
+        <div class="order-list">
+            @foreach (var order in Model.Orders)
+            {
+                <div class="card order-card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <h5 class="card-title">
+                                    <i class="fas fa-receipt me-2"></i>
+                                    Order #@(order.OrderId.ToString("D8"))
+                                </h5>
+                                <div class="text-muted small">
+                                    @order.OrderDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("MM-dd-yyyy", CultureInfo.InvariantCulture)
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="order-status">
+                                    <span class="badge @GetStatusBadgeClass(order.Status)">
+                                        @order.Status
+                                    </span>
+                                </div>
+                                @if (order.DeliveryDate.HasValue)
+                                {
+                                    <div class="text-muted small mt-1">
+                                        <i class="fas fa-truck me-1"></i>
+                                        Est. Delivery:
+                                        @order.DeliveryDate.Value.InZone(QatarDateTime.QatarZone).LocalDateTime.ToDateTimeUnspecified().ToString("dd MMM",CultureInfo.InvariantCulture)
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="order-total">
+                                    <span class="h5">
+                                        QR @order.TotalAmount.ToString("N0")
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 text-end">
+                                <a asp-action="Details" asp-route-id="@order.OrderId"
+                                   class="btn order-details-btn btn-sm">
+                                    View Details <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Order pagination">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-status="@Model.SelectedStatus"
+                           asp-route-search="@Model.SearchQuery">
+                            @i
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+@functions {
+    string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Processing => "bg-info",
+            OrderStatus.Shipped => "bg-primary",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Cancelled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+

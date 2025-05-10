@@ -1,0 +1,127 @@
+﻿@model LavenderLine.ViewModels.Banners.CategoryViewModel
+
+@{
+    ViewData["Title"] = "Edit Category";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h3 class="mb-0">Edit @Model.Name</h3>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Edit" method="post" id="editCategoryForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Category Name</label>
+                            <input asp-for="Name" class="form-control form-control-lg" />
+                            <span asp-validation-for="Name" class="text-danger validation-message"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImageFile" class="form-label">Category Image</label>
+                            <input asp-for="ImageFile" class="form-control"
+                                   accept=".jpg,.jpeg,.png"
+                                   onchange="previewImage(this)" />
+                            <span asp-validation-for="ImageFile" class="text-danger validation-message"></span>
+                            <div class="form-text">Allowed formats: JPG, PNG (Max 5MB)</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="mb-3">Current Image</h6>
+                                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                {
+                                    <img id="currentImagePreview" src="@Model.ImageUrl"
+                                         class="img-fluid rounded-3 mb-3"
+                                         style="max-height: 200px;" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light rounded-3 p-5 mb-3">
+                                        <i class="fas fa-image fa-3x text-secondary"></i>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                </div>
+
+                <input type="hidden" asp-for="CategoryId" />
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(input) {
+            const preview = document.getElementById('currentImagePreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $(document).ready(function () {
+            $('#editCategoryForm').on('submit', function (e) {
+                e.preventDefault();
+                const form = $(this);
+                const formData = new FormData(form[0]);
+
+                // Clear previous validation messages
+                $('.validation-message').empty();
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            Toast.show('success', response.message);
+                            setTimeout(() => window.location.href = '@Url.Action("Index")', 1500);
+                        } else {
+                            Toast.show('error', response.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        const response = xhr.responseJSON;
+                        if (response && response.errors) {
+                            // Display validation errors
+                            Object.entries(response.errors).forEach(([field, messages]) => {
+                                const input = $(`[data-valmsg-for="${field}"]`);
+                                if (input.length) {
+                                    input.html(messages.join('<br>'));
+                                }
+                            });
+                        } else {
+                            Toast.show('error', 'An error occurred while saving.');
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

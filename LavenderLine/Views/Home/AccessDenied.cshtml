@@ -1,0 +1,28 @@
+﻿
+@{
+    ViewData["title"] = "AccessDenied";
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml";
+}
+
+<div class="access-denied-container">
+    <img src="~/img/access-denied.png" alt="403 Forbidden" />
+    <h1 class="display-4">Access Denied</h1>
+    <p class="lead">You do not have permission to access this page.</p>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Return to Home</a>
+</div>
+
+
+    <style>
+        .access-denied-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+            .access-denied-container img {
+                max-width: 300px; 
+                margin-bottom: 20px;
+            }
+    </style>

@@ -1,0 +1,730 @@
+﻿@model LavenderLine.ViewModels.Products.ProductViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = $"{Model.Name} detail";
+    var culture = new CultureInfo("en-QA");
+}
+
+
+
+<style>
+
+
+.sizelength-selector {
+    width: 100%;
+}
+
+.dropdown-toggle {
+    padding: 0.75rem 1rem;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.quantity-control {
+    max-width: 150px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+/* .quantity-input {
+    border: none;
+    background: transparent;
+    width: 50px;
+    text-align: center;
+} */
+
+.image-detail-container{
+    position:relative;
+    display:inline-block;
+    overflow:hidden;
+}
+
+.custom-product-image {
+    width: 400px;
+    height: 400px;
+    object-fit: cover;
+}
+
+.shops{
+        transform: translateY(0);
+}
+
+.main-favi-icon{
+    transform:translateY(0);
+    transition: transform 0.3s ease;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.main-favi-icon:hover{
+    transform:scale(1.1);
+}
+
+.shops:hover {
+    transform: translateY(-2px);
+    color: #fff;
+    box-shadow: 0 5px 15px rgba(138,43,226,0.3);
+}
+
+    .original-price {
+        color: #ccc;
+        text-decoration: line-through;
+    }
+
+
+.related-product-image {
+    height: 200px;
+    object-fit: cover;
+}
+
+.related-products h5 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.related-products .card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.related-products .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.related-products .card-body {
+    padding: 15px;
+}
+
+.related-products .card-title {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.related-products .card-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.related-products .btn {
+    font-size: 0.85rem;
+}
+
+
+    .size-chart-table {
+        width: 100% !important;
+        min-width: 100%;
+    }
+
+
+    #sizeChartModal .modal-content {
+        border-radius: 15px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f8f5f0 0%, #fffdfa 100%);
+        border: 1px solid #e5dcd3;
+    }
+
+    .modal-header {
+        background: #443742;
+        color: #fff;
+        padding: 1.5rem;
+    }
+
+    .modal-body .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+
+    .modal-body .col-md-6 {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .size-chart-table {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(5px);
+        border-collapse: separate;
+        border-spacing: 0;
+        overflow: hidden;
+    }
+
+        .size-chart-table thead th {
+            background: #443742;
+            color: #fff;
+            font-weight: 500;
+            padding: 1rem;
+            border: none;
+            position: relative;
+        }
+
+        .size-chart-table thead th:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background: #846C5B;
+        }
+
+        .size-chart-table tbody td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+
+        .size-chart-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .size-chart-table tbody tr:hover td {
+            background: rgba(212, 175, 55, 0.05);
+            transform: translateX(5px);
+        }
+
+    .measurement-icon {
+        width: 40px;
+        height: 40px;
+        background: #443742;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    @@media (max-width: 768px) {
+        #sizeChartModal .modal-dialog {
+            margin: 0.5rem;
+            max-width: calc(100vw - 1rem);
+        }
+
+        .modal-content {
+            border-radius: 8px !important;
+        }
+
+        .col-md-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        .size-chart-table {
+            display: table;
+            width: 100% !important;
+        }
+
+            .size-chart-table td {
+                min-width: 50% !important;
+                white-space: nowrap;
+            }
+
+        .measurement-icon {
+            width: 30px;
+            height: 30px;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .modal-content {
+            .modal-body
+
+    {
+        padding: 1rem;
+    }
+
+    .size-chart-table td {
+        white-space: normal;
+        padding: 0.75rem 0.5rem !important;
+    }
+
+    .size-chart-table thead th {
+        padding: 0.75rem 0.5rem !important;
+    }
+
+            .size-chart-table tbody td:before {
+                content: attr(data-label);
+                float: left;
+                font-weight: bold;
+                margin-right: 1rem;
+                color: #443742;
+            }
+    }
+
+    /* Cultural Pattern Overlay */
+    .modal-body {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .modal-body:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.1;
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><path fill="%232c1a0d" d="M50 0L0 50 50 100 100 50 50 0z"/></svg>');
+        background-size: 150px;
+        pointer-events: none;
+    }
+
+@@media (max-width: 768px) {
+    .custom-product-image {
+        width: 100%;
+        height: 300px;
+    }
+
+    .main-favi-icon {
+        font-size: 1.5rem;
+        top: 10px;
+        right: 10px;
+    }
+
+    .dropdown-menu {
+        width: 100%;
+    }
+
+    .sizelength-selector {
+        margin-bottom: 1rem;
+    }
+
+    .shops.shop-btn {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+
+    .product-name {
+        font-size: 1.1rem;
+    }
+
+    .product-price {
+        font-size: 0.9rem;
+    }
+
+    .quantity-control {
+        max-width: 130px;
+    }
+}
+
+@@media (max-width: 576px) {
+    .d-flex.justify-content-stratch {
+        flex-direction: column;
+    }
+
+    .flex-grow-1 {
+        width: 100%;
+    }
+}
+
+</style>
+
+
+<div class="container py-4">
+    <form asp-action="AddItem" asp-controller="Cart" method="post" data-cart-form>
+        @Html.AntiForgeryToken()
+        <div class="row g-4">
+           
+            <div class="col-lg-6 text-center position-relative" id="product">
+                <div class="image-detail-container">
+                    <img src="@Model.ImageUrl" class="img-fluid rounded shadow-sm custom-product-image" alt="@Model.Name">
+                    @if (Model.Quantity <= 0)
+                    {
+                        <div class="sold-out-overlay"></div>
+                        <div class="sold-out-label-detail">Sold Out</div>
+                    }
+                    <i class="far fa-heart main-favi-icon favi-icon toggle-wishlist-btn"
+                       data-product-id="@Model.ProductId"
+                       title="Add to Favorites"
+                       data-bs-toggle="tooltip"
+                    @(Model.Quantity <= 0 ? "disabled" : "")></i>
+
+                </div>
+                <input type="hidden" id="userId" value="@ViewBag.UserId" />
+                <input type="hidden" name="ProductId" value="@Model.ProductId" />
+               
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <h3 class="fw-bold">@Model.Name</h3>
+                <p>@Model.Description</p>
+                <p class="fs-4">
+                    @if (Model.IsOnSale)
+                    {
+                        <del class="fw-normal original-price">@Model.OriginalPrice</del>
+                    }
+                    <strong class="fw-bold current-price">QR @Model.Price.ToString("N0")
+                       @*  @string.Format(new CultureInfo("en-QA"), "{0:C}", Model.Price) *@
+                        </strong>
+                </p>
+                <span class="mb-2 text-muted d-flex align-items-center">
+                    Size chart
+                    <i class="fas fa-ruler ms-2 cursor-pointer" data-bs-toggle="modal" data-bs-target="#sizeChartModal"></i>
+                </span>
+            
+
+           
+                <div class="d-flex justify-content-stratch my-5">
+                  
+                    <div class="flex-grow-1 me-2">
+                        <div class="dropdown sizelength-selector border">
+                            <a class="dropdown-toggle d-flex align-items-center text-dark w-100"
+                                    role="button"
+                                    id="lengthDropdown"
+                                    data-bs-toggle="dropdown"
+                                     >     
+                                     Select length
+                                <i class="fa fa-chevron-down language-arrow"></i>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="lengthDropdown">
+                                <li><a class="dropdown-item disabled" href="#">Select Length</a></li>
+                                @foreach (var length in Model.Lengths)
+                                {
+                                    <li>
+                                        <a class="dropdown-item" id="length" href="#" data-length="@length" data-bs-toggle="tooltip"
+                                           data-bs-title="Length from shoulder to hem">
+                                            @length
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                            <input type="hidden" id="selectedLength" name="Length" value="" />
+                        </div>
+                    </div>
+
+                    <div class="flex-grow-1">
+
+                        <div class="dropdown sizelength-selector border">
+                            <a class="dropdown-toggle align-items-center text-dark w-100"
+                                     role="button"
+                                    id="sizeDropdown"
+                                    data-bs-toggle="dropdown"
+                                     >
+                                     Select size
+                                <i class="fa fa-chevron-down language-arrow"></i>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="sizeDropdown">
+                                <li><a class="dropdown-item disabled" href="#">Select Size</a></li>
+                                @foreach (var size in Model.Sizes)
+                                {
+                                    <li>
+                                        <a class="dropdown-item" id="size" href="#" data-size="@size" data-bs-toggle="tooltip"
+                                           data-bs-title="Bust measurement">
+                                            @size
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                            <input type="hidden" id="selectedSize" name="Size" value="" />
+                        </div>
+                    </div>
+                </div>
+
+                  @if (Model.Quantity <= 0)
+                 {
+                    <div class="alert alert-warning w-100">This product is currently out of stock</div>
+                }
+                else
+                {
+                    <!-- Quantity Selector -->
+                    <div class="quantity-control input-group mb-4 bg-white">
+
+
+
+                        <div class="d-flex align-items-center">
+                            <button type="button"
+                                    class="btn btn-sm btn-custom quantity-btn"
+                                    data-action="decrement"
+                            @(Model.Quantity <= 0 ? "disabled" : "")>
+                                -
+                            </button>
+                            <input type="number"
+                                   name="Quantity"
+                                   class="form-control mx-2 text-center bg-white no-border @(Model.Quantity <= 0 ? "disabled" : "")"
+                                   value="1"
+                                   min="1"
+                                   max="@Model.Quantity"
+                                   data-quantity-input
+                                   readonly
+                                   style="max-width: 50px;"
+                                   >
+                            <button type="button"
+                                    class="btn btn-sm btn-custom quantity-btn"
+                                    data-action="increment"
+                            @(Model.Quantity <= 0 ? "disabled" : "")>
+                                +
+                            </button>
+                        </div>
+
+
+                    </div>
+                }
+             
+                <!-- Add to Cart Button -->
+                <div class="d-flex">
+                  
+                    <button data-product-id="@Model.ProductId" type="submit" class="shops shop-btn text-white btn-lg flex-grow-1" style="white-space: nowrap;" @(Model.Quantity <= 0 ? "disabled" : "")>
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Related Products Section -->
+    @if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
+    {
+        <div class="related-products mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="fw-bold">Related Products</h5>
+                <div class="custom-nav">
+                    <button class="btn btn-sm btn-outline-dark related-prev"><i class="fas fa-chevron-left"></i></button>
+                    <button class="btn btn-sm btn-outline-dark related-next ms-2"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="owl-carousel owl-theme">
+                @foreach (var product in Model.RelatedProducts)
+                {
+
+                    <div class="item">
+                        <div class="product mx-2 p-0 mb-5 @(product.Quantity < 1 ? "sold-out" : "")">
+                            <div class="product-image-container">
+                                <div class="shimmer-placeholder" aria-hidden="true"></div>
+                                <img src=""
+                                     alt="Image of @product.Name"
+                                     class="img-fluid"
+                                     width="400"
+                                     loading="lazy"
+                                     decoding="async"
+                                     data-src="@product.ImageUrl"
+                                     height="400">
+
+                                @if (product.Quantity < 1)
+                                {
+                                    <div class="sold-out-label">Sold Out</div>
+                                }
+                                else
+                                {
+                                    <div class="product-overlay">
+                                        <button class="shop-btn" id="addToCartBtn-@product.ProductId"
+                                                data-bs-toggle="modal" data-product-id="@product.ProductId" data-bs-target="#colorSizeModal-@product.ProductId">
+                                            <i class="fas fa-shopping-cart"></i>
+                                        </button>
+                                        <a asp-controller="Home" asp-action="Details" asp-route-id="@product.ProductId" class="quick-view-button">
+                                            <i class="fas fa-eye"></i> Quick View
+                                        </a>
+                                    </div>
+                                }
+
+                            </div>
+                            <label class="text-muted abaya-text">@product.CategoryName</label>
+                            <h3 class="product-name">@product.Name</h3>
+                            <div class="product-price">
+                                @if (product.IsOnSale)
+                                {
+                                    <span class="small text-secondary fw-bold text-decoration-line-through me-2">@product.OriginalPrice</span>
+                                }
+                                <span class="current-price fw-bold">QR @product.Price.ToString("N0", culture)</span>
+                            </div>
+                            <i class="far fa-heart favi-icon toggle-wishlist-btn" data-product-id="@product.ProductId" title="Add to Favorites"></i>
+                        </div>
+
+                        <partial name="~/Views/Cart/_LengthSizeModal.cshtml" model="new LavenderLine.ViewModels.Carts.ColorSizeModalViewModel {
+                ProductId = product.ProductId,
+                ProductName = product.Name,
+                ImageUrl = product.ImageUrl,
+                ProductPrice = product.Price,
+                AvailableSizes = product.Sizes.Select(c=>c.Trim()).ToList(),
+                AvailableLength = product.Lengths.Select(c=>c.Trim()).ToList(),
+                MaxQuantity = product.Quantity,
+            }" />
+                    </div>
+                }
+            </div>
+           
+        </div>
+    }
+    else
+    {
+        <p>No related products found.</p>
+    }
+</div>
+
+<div class="modal fade" id="sizeChartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-ruler-combined me-2"></i>
+                    Abaya Sizing Guide
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <div class="col-12 text-center mb-4">
+                        <div class="measurement-icon">
+                            <i class="fas fa-tshirt text-white"></i>
+                        </div>
+                        <h6 class="text-uppercase text-dark mb-3">Body Measurements</h6>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="table-responsive">
+                            <table class="table size-chart-table">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">Standard Sizing</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>XS</td>
+                                        <td>48-50" Length</td>
+                                    </tr>
+                                    <tr>
+                                        <td>S</td>
+                                        <td>50-52" Length</td>
+                                    </tr>
+                                    <tr>
+                                        <td>M</td>
+                                        <td>52-54" Length</td>
+                                    </tr>
+                                    <tr>
+                                        <td>L</td>
+                                        <td>54-56" Length</td>
+                                    </tr>
+                                    <tr>
+                                        <td>XL</td>
+                                        <td>56-58" Length</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="table-responsive">
+                            <table class="table size-chart-table">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">Custom Options</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Tall</td>
+                                        <td>+2-4" Length</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Petite</td>
+                                        <td>-2-4" Length</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Full Sleeve</td>
+                                        <td>24-26"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3/4 Sleeve</td>
+                                        <td>20-22"</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Elastic Cuffs</td>
+                                        <td>Available</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        // Initialize selections
+        $(function () {
+            $('#selectedLength').val($('#length').val());
+            $('#selectedSize').val($('#size').val());
+
+           
+            $(document).on('click', '.dropdown-item[data-length]', function (e) {
+                e.preventDefault();
+                const $parent = $(this).closest('.dropdown');
+                const length = $(this).data('length');
+
+                $parent.find('#selectedLength').val(length);
+
+                $parent.find('.dropdown-toggle').html(`
+                <span class="me-2">${length}</span>
+                <i class="fa fa-chevron-down language-arrow"></i>
+            `);
+
+                      
+            });
+
+            $(document).on('click', '.dropdown-item[data-size]', function (e) {
+                e.preventDefault();
+                const $parent = $(this).closest('.dropdown');
+                const size = $(this).data('size');
+
+
+                $parent.find('.dropdown-toggle').html(`
+                        <span class="me-2">${size}</span>
+                        <i class="fa fa-chevron-down language-arrow"></i>
+                    `);
+
+                $parent.find('#selectedSize').val(size);
+
+             
+            });
+
+            $('.owl-carousel').owlCarousel({
+                loop: false,
+                margin: 20,
+                nav: false,
+                dots: true,
+                responsive: {
+                    0: {
+                        items: 1
+                    },
+                    576: {
+                        items: 2
+                    },
+                    768: {
+                        items: 3
+                    },
+                    992: {
+                        items: 4
+                    }
+                }
+            });
+
+            $('.related-prev').click(function () {
+                $('.owl-carousel').trigger('prev.owl.carousel');
+            });
+
+            $('.related-next').click(function () {
+                $('.owl-carousel').trigger('next.owl.carousel');
+            });
+        });
+
+
+    </script>
+}

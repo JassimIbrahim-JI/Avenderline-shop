@@ -1,0 +1,248 @@
+﻿@model LavenderLine.ViewModels.Orders.CheckoutViewModel
+
+
+@{
+    ViewData["Title"] = "Order Checkout";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-card">
+        <div class="row g-0">
+            <!-- Shipping Information -->
+            <div class="col-lg-7 form-section">
+                <h2 class="mb-4 display-6 fw-bold text-dark">Complete Your Order</h2>
+                
+                <form asp-action="Checkout" method="post" id="checkoutForm">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-4">
+                        <h4 class="mb-3"><i class="fas fa-shipping-fast me-2"></i>Shipping Details</h4>
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Email Address</label>
+                                    <input type="text" class="form-control form-checkout" asp-for="Email" required readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" class="form-control form-checkout" asp-for="FullName" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Contact Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">+974</span>
+                                        <input type="tel" class="form-control form-checkout"
+                                               placeholder="50123456"
+                                               pattern="[0-9]{8}"
+                                               asp-for="PhoneNumber"
+                                               required>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Enter 8-digit Qatari number (e.g. 50123456)
+                                    </small>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Delivery Area</label>
+                                    <select class="form-select form-checkout" asp-for="Area" required>
+                                        <option value="">Select Your Area</option>
+                                        <option>Doha</option>
+                                        <option>Al Wakrah</option>
+                                        <option>Al Rayyan</option>
+                                        <option>Umm Salal</option>
+                                        <option>Al Khor</option>
+                                        <option>Lusail</option>
+                                        <option>The Pearl</option>
+                                    </select>
+                                </div>
+                               <div class="col-12 mt-3">
+                                <label class="form-label">Street Address</label>
+                                <input type="text" class="form-control form-checkout"
+                                       asp-for="AddressLine"
+                                       placeholder="Building No, Street Name, Landmark"
+                                       required>
+                                <small class="form-text text-muted">
+                                    Example: Building 45, Al Corniche Street, Near City Center
+                                </small>
+                            </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" class="form-control form-checkout" asp-for="FullName" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Contact Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">+974</span>
+                                        <input type="tel" class="form-control form-checkout"
+                                               placeholder="50123456"
+                                               title="8-digit Qatari number starting with 5,6, or 7"
+                                               pattern="[0-9]{8}"
+                                               asp-for="PhoneNumber"
+                                               required 
+                                               id="PhoneNumber">
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Enter 8-digit Qatari number (e.g. 50123456)
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email Address</label>
+                                    <input type="email" class="form-control form-checkout" asp-for="Email" required />
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Delivery Area</label>
+                                    <select class="form-select form-checkout" asp-for="Area" required>
+                                        <option value="">Select Area</option>
+                                        <option>Doha</option>
+                                        <option>Al Wakrah</option>
+                                        <option>Al Rayyan</option>
+                                        <option>Umm Salal</option>
+                                        <option>Al Khor</option>
+                                        <option>Lusail</option>
+                                        <option>The Pearl</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 mt-3">
+                                    <label class="form-label">Street Address</label>
+                                    <input type="text" class="form-control form-checkout"
+                                           asp-for="AddressLine"
+                                           placeholder="Building No, Street Name, Landmark"
+                                           required>
+                                    <small class="form-text text-muted">
+                                        Example: Building 45, Al Corniche Street, Near City Center
+                                    </small>
+                                </div>
+
+                            </div>
+                        }
+                    </div>
+
+               @*      <!-- Delivery Date -->
+                    <div class="mb-4">
+                        <h4 class="mb-3"><i class="far fa-calendar-alt me-2"></i>Delivery Date</h4>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+                            <input type="date" class="form-control form-checkout" asp-for="DeliveryDate"
+                                   min="@QatarDateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" />
+                        </div>
+                    </div> *@
+
+                    <!-- Payment Methods -->
+                    <h4 class="mb-3"><i class="far fa-credit-card me-2"></i>Payment Method</h4>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="payment-method-card" onclick="selectPayment('Cash')">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="Cash" checked />
+                                    <label class="form-check-label fw-bold">Cash on Delivery</label>
+                                </div>
+                                <p class="text-muted mt-2 small">Pay with cash when your order arrives</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="payment-method-card" onclick="selectPayment('Card')">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="Card" />
+                                    <label class="form-check-label fw-bold">Credit/Debit Card</label>
+                                </div>
+                                <div class="mt-2">
+                                    <i class="fab fa-cc-visa fa-2x me-2"></i>
+                                    <i class="fab fa-cc-mastercard fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-checkout w-100 py-3">
+                        <i class="fas fa-lock me-2"></i>Complete Purchase
+                    </button>
+                </form>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-5 summary-section">
+                <h3 class="mb-4 display-6 fw-bold text-dark">Order Summary</h3>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="list-group">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <div class="list-group-item border-0">
+                                    <div class="row align-items-center">
+                                        <div class="col-3">
+                                            <img src="@item.ImageUrl" class="product-checkout-image" alt="@item.Name">
+                                        </div>
+                                        <div class="col-9">
+                                            <h6 class="mb-1">@item.Name</h6>
+                                            <small class="text-muted">
+                                                @item.Length @item.Size • Qty: @item.Quantity
+                                            </small>
+                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                <span class="text-muted"><span class="currency-symbol">QR </span>@item.Price.ToString("N0")</span>
+                                                <span class="fw-bold"><span class="currency-symbol">QR </span>@((item.Price * item.Quantity).ToString("N0"))</span>
+                                              
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="total-box">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span><span class="currency-symbol">QR </span>@Model.CartTotal.ToString("N0")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Shipping:</span>
+                        <span><span class="currency-symbol">QR </span>@Model.ShippingFee.ToString("N0") </span>
+                    </div>
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total:</span>
+                        <span><span class="currency-symbol">QR </span>@Model.CalculatedTotal.ToString("N0")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="spinner-shop"></div>
+</div>
+
+@section Scripts {
+    <script>
+        function selectPayment(method) {
+            document.querySelectorAll('.payment-method-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            document.querySelector(`input[value="${method}"]`).checked = true;
+        }
+
+        document.getElementById('checkoutForm').addEventListener('submit', function() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        });
+    </script>
+}

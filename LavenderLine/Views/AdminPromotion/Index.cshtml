@@ -1,0 +1,47 @@
+﻿@model Promotion
+
+@{
+    ViewData["Title"] = "Promotion Section";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="container mt-4">
+    <h2 class="text-bg-secondary mb-3">Current Promotion</h2>
+@if (Model != null)
+{
+  
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Title</th>
+                        <th>Promotion Text</th>
+                        <th>Discount</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.Title</td>
+                        <td>@Model.PromotionText</td>
+                        <td>@Model.DiscountPercentage%</td>
+                        <td>@Model.StartDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))</td>
+                        <td>@Model.EndDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-warning me-2">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+}
+else
+{
+    <div class="row justify-content-center alert alert-warning" role="alert">
+        No promotions found.
+    </div>
+}
+</div>

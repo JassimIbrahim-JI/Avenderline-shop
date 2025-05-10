@@ -1,0 +1,28 @@
+﻿@{
+    int count = (int)ViewBag.PromotionCount;
+}
+@if (count > 0)
+{
+    <span class="badge badge-pill badge-danger" style="position: absolute; top: -10px; right: -10px;">@count</span>
+}
+
+@section Scripts{
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const updatePromotionBadge = (count) => {
+                const badge = document.querySelector('.navbar .badge');
+                if (badge) {
+                    badge.textContent = count;
+                    if (count > 0) {
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            };
+
+            // Example of how to update badge dynamically
+            // updatePromotionBadge(5);
+        });
+    </script>
+}

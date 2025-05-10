@@ -1,0 +1,88 @@
+﻿@using LavenderLine.Data
+@using LavenderLine.Views.AdminAccount
+@model LavenderLine.ViewModels.Users.UserViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <h2 class="text-center mb-4">Edit @Model.FullName</h2>
+
+            <form asp-action="Edit" method="post" id="editUserForm">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>First Name:</label>
+                    <input type="text" asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Area</label>
+                    <select asp-for="Area" class="form-select" required>
+                        <option value="">Select Area</option>
+                        <option>Doha</option>
+                        <option>Al Wakrah</option>
+                        <option>Al Rayyan</option>
+                        <option>Umm Salal</option>
+                        <option>Al Khor</option>
+                        <option>Lusail</option>
+                        <option>The Pearl</option>
+                    </select>
+                    <span asp-validation-for="Area" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Contact Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text">+974</span>
+                        <input type="tel" asp-for="PhoneNumber" class="form-control"
+                               placeholder="50123456" pattern="[5-7]\d{7}"
+                               title="8-digit Qatari number starting with 5,6, or 7"
+                               
+                               id="PhoneNumber">
+                    </div>
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Role:</label>
+                    @Html.RoleDropdown(Model.Role)
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary mr-2">Save Changes</button>
+                    <a href="@Url.Action("Index", "AdminAccount")" class="btn btn-secondary">Cancel</a>
+                </div>
+
+                <div id="loadingSpinner" class="text-center" style="display: none;">
+                    <div class="loading-overlay">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#editUserForm').on('submit', function () {
+                $('#loadingSpinner').show();
+            });
+        });
+    </script>
+}

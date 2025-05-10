@@ -1,0 +1,274 @@
+﻿@model LavenderLine.Models.Order
+@{
+    ViewData["Title"] = "Order Details";
+    Layout = ViewData["Layout"]?.ToString() ?? "_Layout";
+}
+
+<link rel="stylesheet" href="~/css/views/details.css" />
+
+<div class="order-details-container">
+    <div class="container">
+        <div class="order-card shadow-lg">
+            <!-- Order Header -->
+            <div class="order-details-title order-header text-center py-4">
+                <h1 class="mb-3">
+                    <i class="fas fa-box-open me-2"></i>Order Details
+                </h1>
+                <div class="order-meta">
+                    <span class="order-meta-badge">Order #@(Model.OrderId.ToString("D8"))</span>
+                    <span class="text-muted">Placed on @Model.OrderDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)</span>
+                </div>
+            </div>
+
+            <!-- Order Body -->
+            <div class="card-body p-4">
+                <!-- Status and Summary -->
+                <div class="row mb-5">
+                    <div class="col-md-6 mb-3">
+                        <h4 class="section-title mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Order Status
+                        </h4>
+                        <div class="order-status-card">
+                            <p class="mb-2 status-indicator">
+                                <strong>Current Status:</strong>
+                                <span class="badge status-badge">@Model.Status</span>
+                            </p>
+                            @if (Model.DeliveryDate.HasValue)
+                            {
+                                <p class="mb-0">
+                                    <strong>Estimated Delivery:</strong>
+                                    @Model.DeliveryDate.Value.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+                                </p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h4 class="section-title mb-3">
+                            <i class="fas fa-receipt me-2"></i>Payment Summary
+                        </h4>
+                        <div class="payment-summary-card">
+                            <div class="d-flex justify-content-between mb-2 summary-label">
+                                <span>Items Total:</span>
+                                <span class="order-price">QR @((Model.TotalAmount - Model.ShippingFee).ToString("N0"))</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3 summary-label">
+                                <span>Shipping Fee:</span>
+                                <span class="order-price">QR @Model.ShippingFee.ToString("N0")</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between fw-bold fs-5 summary-label">
+                                <span>Total Paid:</span>
+                                <span class="order-price">QR @Model.TotalAmount.ToString("N0")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <h4 class="section-title mb-4">
+                    <i class="fas fa-list-ul me-2"></i>Order Items
+                </h4>
+                <div class="table-responsive">
+                    <table class="order-items table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Size/Length</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderItems)
+                            {
+                                <tr>
+                                    <td class="align-middle">
+                                        <div class="d-flex align-items-center">
+                                            <img src="@item.Product.ImageUrl"
+                                                 class="product-image-details me-3"
+                                                 alt="@item.Product.Name">
+                                            <div>
+                                                <h6 class="mb-0">@item.Product.Name</h6>
+                                                <small class="text-muted">SKU: @item.Product.Category.Name</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        @item.Size @item.Length
+                                    </td>
+                                    <td class="align-middle">@item.Quantity</td>
+                                    <td class="align-middle order-price">
+                                        QR @item.Price.ToString("N0")
+                                    </td>
+                                    <td class="align-middle fw-bold order-price">
+                                        QR @((item.Price * item.Quantity).ToString("N0"))
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Payment Details -->
+                @if (Model.Payment != null)
+                {
+                    <div class="payment-details mt-5">
+                        <h4 class="section-title mb-4">
+                            <i class="fas fa-credit-card me-2"></i>Payment Information
+                        </h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Payment Method:</dt>
+                                    <dd class="col-sm-8">@Model.Payment.PaymentMethod</dd>
+
+                                    <dt class="col-sm-4">Status:</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge payment-status">@Model.Payment.Status</span>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Payment Date:</dt>
+                                    <dd class="col-sm-8">
+                                        @Model.Payment.PaymentDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToDateTimeUnspecified().ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture)
+                                    </dd>
+
+                                    @if (!string.IsNullOrEmpty(Model.Payment.PaymentIntentId))
+                                    {
+                                        <dt class="col-sm-4">Transaction ID:</dt>
+                                        <dd class="col-sm-8">@Model.Payment.PaymentIntentId</dd>
+                                    }
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Order History Timeline -->
+                @if (Model.OrderHistories.Any())
+                {
+                    <div class="history-timeline mt-5">
+                        <h4 class="section-title mb-4">
+                            <i class="fas fa-history me-2"></i>Order History
+                        </h4>
+
+                        <div class="order-timeline">
+                            @foreach (var entry in Model.OrderHistories.OrderByDescending(h => h.ChangeDate))
+                            {
+                                <div class="timeline-item">
+                                    <div class="order-timeline-badge"></div>
+                                    <div class="order-timeline-card">
+                                        <div class="timeline-header">
+                                            <span class="badge timeline-badge">@entry.FieldChanged</span>
+                                            <small class="text-muted ms-2">
+                                                @entry.ChangeDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToDateTimeUnspecified().ToString("dd MMM yyyy HH:mm",CultureInfo.InvariantCulture)
+                                            </small>
+                                        </div>
+                                        <div class="timeline-body">
+                                            <span class="change-from">@entry.OldValue</span>
+                                            <i class="fas fa-arrow-right mx-2 text-muted"></i>
+                                            <span class="change-to">@entry.NewValue</span>
+                                        </div>
+                                        <div class="timeline-footer small">
+                                            Changed by: @entry.ChangedBy
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Action Buttons -->
+                <div class="text-center mt-5">
+                    <a asp-action="Index" class="btn order-details-btn btn-lg px-5">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts{
+
+} 
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 40px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-badge {
+        position: absolute;
+        left: -20px;
+        top: 15px;
+        width: 12px;
+        height: 12px;
+        background: #0d6efd;
+        border-radius: 50%;
+    }
+
+    .timeline-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        position: relative;
+        border: 1px solid #dee2e6;
+    }
+
+    .timeline-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .change-from {
+        color: #dc3545;
+        font-weight: 500;
+    }
+
+    .change-to {
+        color: #28a745;
+        font-weight: 500;
+    }
+
+    .timeline-footer {
+        margin-top: 8px;
+        color: #6c757d;
+    }
+
+    #content-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    #content {
+        flex: 1;
+        padding-bottom: 60px;
+    }
+
+    .sticky-footer {
+        position: relative;
+        margin-top: -60px;
+        height: 60px;
+        flex-shrink: 0;
+    }
+
+
+    .order-details-container {
+        padding-bottom: 30px;
+    }
+</style>

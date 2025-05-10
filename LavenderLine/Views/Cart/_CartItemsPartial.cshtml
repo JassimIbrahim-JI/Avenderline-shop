@@ -1,0 +1,101 @@
+﻿@model IEnumerable<CartItemDto>
+
+<style>
+ 
+    .grand-total {
+        font-size: 0.9rem;
+        font-weight: bold;
+        margin-top: 0.5rem;
+    }
+
+    .divider {
+        border-top: 1px solid #ddd;
+        margin: 1rem 0;
+    }
+
+    .remove-item-btn {
+        background: none;
+        border: none;
+        font-size: 1.3rem;
+        color: red;
+        cursor: pointer;
+        padding: 0;
+        transition: color 0.2s ease;
+    }
+
+    .remove-item-btn:hover {
+        color: darkred;
+    }
+
+    .remove-x {
+        display: inline-block;
+        line-height: 1;
+    }
+</style>
+
+<div class="cart-container">
+    @if (Model.Any())
+    {
+        decimal grandTotal = 0; 
+
+        foreach (var item in Model)
+        {
+            decimal itemTotal = item.Price * item.Quantity;
+            grandTotal += itemTotal;
+
+            <div class="cart-item mb-3 p-1 border-bottom" data-price="@item.Price" data-quantity="@item.Quantity">
+                <div class="row align-items-center">
+                    <div class="col-3">
+                        <img src="@item.ImageUrl" class="img-fluid rounded" alt="@item.Name">
+                    </div>
+                    <div class="col-6">
+                        <h6>@item.Name</h6>
+                        <span class="text-danger fw-bold">QR @item.Price.ToString("N0", new CultureInfo("en-QA"))</span>
+                        <div class="text-muted small">
+                            Qty: @item.Quantity
+                        </div>
+                    </div>
+                    <div class="col-3 text-end">
+                        <form class="remove-item-form" data-product-id="@item.ProductId">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ProductId" value="@item.ProductId" />
+                            <input type="hidden" name="Size" value="@item.Size" />
+                            <input type="hidden" name="Length" value="@item.Length" />
+                            <button type="submit" class="remove-item-btn">
+                                <span class="remove-x">&times;</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="grand-total d-flex justify-content-between">
+            <span class="fw-bold">Total:</span>
+            <span class="text-dark" id="grand-total">QR @grandTotal.ToString("N0", new CultureInfo("en-QA"))</span>
+        </div>
+
+
+        <div class="divider"></div>
+
+        <div class="mt-2 d-grid gap-2 text-center">
+            
+            <a href="@Url.Action("Index", "Cart")" class="btn-primary btn-sm">
+                View Cart <i class="fas fa-shopping-cart ms-2"></i>
+            </a>
+          
+        </div>
+
+
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+            <h4 class="mb-3">Your cart is empty</h4>
+            <a href="@Url.Action("Shop", "Home")" class="btn btn-secondary btn-lg">
+                Start Shopping <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    }
+</div>

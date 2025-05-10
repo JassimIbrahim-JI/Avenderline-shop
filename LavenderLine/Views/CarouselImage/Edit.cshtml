@@ -1,0 +1,120 @@
+﻿@model LavenderLine.ViewModels.Banners.EditCarouselViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml";
+    ViewData["Title"] = "Edit Carousel Image";
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Edit Carousel Image</h3>
+        </div>
+        <div class="card-body">
+            <form id="editForm" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ImageUrl" />
+                <div class="row">
+                    <!-- Image Preview Section -->
+                    <div class="col-md-6 mb-4">
+                        <div class="image-preview-container border rounded p-3">
+                            <label class="form-label">Current Image</label>
+                            <img id="imagePreview" src="@Model.ImageUrl"
+                                 class="img-fluid rounded mb-3"
+                                 alt="Current image preview"
+                                 style="max-height: 300px; object-fit: contain;">
+
+                            <div class="mb-3">
+                                <label asp-for="ImageFile" class="form-label">Upload New Image</label>
+                                <input asp-for="ImageFile" type="file"
+                                       class="form-control"
+                                       accept="image/*"
+                                       onchange="previewImage(event)">
+                                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Fields Section -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Caption" class="form-label">Caption</label>
+                            <input asp-for="Caption" class="form-control"
+                                   placeholder="Enter image caption">
+                            <span asp-validation-for="Caption" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control"
+                                      rows="4"
+                                      placeholder="Enter image description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" id="saveButton"
+                                    class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a href="@Url.Action("Index")"
+                               class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Image Preview Functionality
+        function previewImage(event) {
+            const preview = document.getElementById('imagePreview');
+            const file = event.target.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // AJAX Form Submission
+        $(document).ready(function () {
+            $('#saveButton').click(function () {
+                const formData = new FormData($('#editForm')[0]);
+                $('#loading-overlay').show();
+
+                $.ajax({
+                    url: '@Url.Action("Edit", "CarouselImage")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        $('#loading-overlay').hide();
+                        if (response.success) {
+                            Toast.show('success', response.message);
+                            setTimeout(() => {
+                                window.location.href = '@Url.Action("Index", "CarouselImage")';
+                            }, 1500);
+                        } else {
+                            Toast.show('danger', response.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        $('#loading-overlay').hide();
+                        Toast.show('danger', 'Error: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

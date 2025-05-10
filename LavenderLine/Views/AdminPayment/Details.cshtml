@@ -1,0 +1,70 @@
+﻿@using LavenderLine.Enums.Payment
+@model Payment
+
+@{
+    ViewData["Title"] = $"Payment Details - {Model.Id}";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="m-0 font-weight-bold">Payment #@Model.Id</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Payment Information</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Amount</dt>
+                        <dd class="col-sm-8">@Model.Amount.ToString("N2") QAR</dd>
+
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge @GetStatusBadge(Model.Status)">
+                                @Model.Status
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Payment Date</dt>
+                        <dd class="col-sm-8">@Model.PaymentDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("f", new CultureInfo("en-QA"))</dd>
+                    </dl>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="mb-3">Related Information</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Order ID</dt>
+                        <dd class="col-sm-8">@Model.OrderId</dd>
+
+                        <dt class="col-sm-4">Payment Method</dt>
+                        <dd class="col-sm-8">@Model.PaymentMethod</dd>
+
+                        <dt class="col-sm-4">Payment Intent ID</dt>
+                        <dd class="col-sm-8">@Model.PaymentIntentId</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Payments
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadge(PaymentStatus status)
+    {
+        return status switch
+        {
+            PaymentStatus.Pending => "bg-warning",
+            PaymentStatus.Completed => "bg-success",
+            PaymentStatus.Refunded => "bg-info",
+            PaymentStatus.Failed => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}

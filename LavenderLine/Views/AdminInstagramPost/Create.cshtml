@@ -1,0 +1,103 @@
+﻿@model InstagramPost  
+
+@{  
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";  
+}  
+
+<div class="container mt-4 animate__animated animate__fadeIn">  
+    <h2 class="text-bg-secondary">Create Post</h2>  
+
+    <form asp-action="Create" method="post" id="createForm" enctype="multipart/form-data">  
+        <div class="row justify-content-center">  
+            <div class="col-md-6">  
+                <div class="form-group">  
+                    <label asp-for="ImageFile">Upload Image</label>  
+                    <input asp-for="ImageFile" type="file" class="form-control" name="ImageFile" />  
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>  
+                </div>  
+                <div class="form-group">  
+                    <label asp-for="Caption">Caption</label>  
+                    <input asp-for="Caption" class="form-control" placeholder="Enter caption" />  
+                    <span asp-validation-for="Caption" class="text-danger"></span>  
+                </div>  
+                <div class="form-group">  
+                    <label asp-for="Hashtag">Hashtags (Optional)</label>  
+                    <input asp-for="Hashtag" class="form-control" placeholder="#fashion #abaya #style" />  
+                    <span asp-validation-for="Hashtag" class="text-danger"></span>  
+                </div>  
+                <div class="form-group">  
+                    <label>Instagram Post URL</label>  
+                    <input type="url" class="form-control" asp-for="PostUrl" required />  
+                    <span asp-validation-for="PostUrl" class="text-danger"></span>  
+                </div>  
+                <button type="button" id="submitBtn" class="btn btn-primary">Add Post</button> 
+                <div id="loadingSpinner" class="text-center" style="display:none">  
+                    <div class="loading-overlay">  
+                        <div class="spinner-border" role="status">  
+                            <span class="sr-only">Loading...</span>  
+                        </div>  
+                    </div>  
+                </div>  
+            </div>  
+            <div class="col-md-4">  
+                <div class="text-center">  
+                    <img id="imagePreview" alt="Image Preview" style="display:none; max-width:200px; max-height:200px;" />  
+                </div>  
+            </div>  
+        </div>  
+    </form>  
+</div>  
+
+@section Scripts {  
+    <script>  
+        $(document).ready(function () {  
+            $('#submitBtn').on('click', function (event) {  
+                event.preventDefault(); 
+                const formData = new FormData($('#createForm')[0]);  
+
+               
+                $('#loadingSpinner').show();  
+                
+                $.ajax({  
+                    url: '@Url.Action("Create", "AdminInstagramPost")',  
+                    type: 'POST',  
+                    data: formData,  
+                    contentType: false,  
+                    processData: false,  
+                    success: function (response) {  
+                        $('#loadingSpinner').hide();  
+                        if (response.success) {  
+                            Toast.show('success', response.message); 
+                            setTimeout(function () {  
+                                window.location.href = '@Url.Action("Index", "AdminInstagramPost")'; 
+                            }, 1500);  
+                        } else {  
+                            
+                            response.errors.forEach(function (error) {  
+                                Toast.show('danger', error);  
+                            });  
+                        }  
+                    },  
+                    error: function (xhr, status, error) {  
+                        $('#loadingSpinner').hide();  
+                        Toast.show('danger', 'An error occurred while adding the Instagram post.');  
+                    }  
+                });  
+            });  
+
+              
+            $('[name="ImageFile"]').change(function (event) {  
+                const file = event.target.files[0];  
+                if (file) {  
+                    const reader = new FileReader();  
+                    reader.onload = function (e) {  
+                        $('#imagePreview').attr('src', e.target.result).show();  
+                    };  
+                    reader.readAsDataURL(file);  
+                } else {  
+                    $('#imagePreview').hide();  
+                }  
+            });  
+        });  
+    </script>  
+}

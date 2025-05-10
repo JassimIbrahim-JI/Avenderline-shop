@@ -1,0 +1,166 @@
+﻿@model LavenderLine.Models.CarouselImage
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    ViewData["Title"] = "Add New Carousel Image";
+}
+
+<div class="container py-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Carousel Image</h3>
+        </div>
+        <div class="card-body">
+            <form id="createForm" method="post" enctype="multipart/form-data">
+                <div class="row">
+                    <!-- Image Upload Section -->
+                    <div class="col-md-6 mb-4">
+                        <div class="image-upload-container border rounded p-3">
+                            <div class="mb-3">
+                                <label asp-for="ImageFile" class="form-label">Upload Image</label>
+                                <input asp-for="ImageFile" type="file"
+                                       class="form-control"
+                                       accept="image/*"
+                                       onchange="previewImage(event)">
+                                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                            </div>
+
+                            <div class="image-preview-wrapper text-center">
+                                <img id="imagePreview" src="#"
+                                     class="img-fluid rounded"
+                                     alt="Image preview"
+                                     style="max-height: 300px; display: none;">
+                                <p class="text-muted mt-2" id="previewText">Image preview will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Fields Section -->
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Caption" class="form-label">Caption</label>
+                            <input asp-for="Caption" class="form-control"
+                                   placeholder="Enter image caption (max 200 characters)">
+                            <span asp-validation-for="Caption" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control"
+                                      rows="4"
+                                      placeholder="Enter image description (max 200 characters)"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" id="saveButton"
+                                    class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>Create Image
+                            </button>
+                            <a href="@Url.Action("Index")"
+                               class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Enhanced Image Preview Functionality
+        function previewImage(event) {
+            const preview = document.getElementById('imagePreview');
+            const previewText = document.getElementById('previewText');
+            const file = event.target.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    previewText.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = '#';
+                preview.style.display = 'none';
+                previewText.style.display = 'block';
+            }
+        }
+
+        // AJAX Form Submission
+        $(document).ready(function () {
+            $('#saveButton').click(function () {
+                const formData = new FormData($('#createForm')[0]);
+                $('#loading-overlay').show();
+
+                $.ajax({
+                    url: '@Url.Action("Create", "CarouselImage")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        $('#loading-overlay').hide();
+                        if (response.success) {
+                            Toast.show('success', response.message);
+                            setTimeout(() => {
+                                window.location.href = '@Url.Action("Index", "CarouselImage")';
+                            }, 1500);
+                        } else {
+                            Toast.show('danger', response.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        $('#loading-overlay').hide();
+                        Toast.show('danger', 'Error: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <style>
+        .image-upload-container {
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .image-preview-wrapper {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: white;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #imagePreview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+            #imagePreview:hover {
+                transform: scale(1.02);
+            }
+
+        .card {
+            border-radius: 12px;
+        }
+
+        .form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+        }
+    </style>
+}

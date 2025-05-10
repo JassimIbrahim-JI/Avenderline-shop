@@ -1,0 +1,89 @@
+﻿@model LavenderLine.ViewModels.Users.UserViewModel
+
+@{
+    ViewData["Title"] = "User Details";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-bg-secondary">User Details</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">@(Model.FullName ?? "N/A")</h4>
+            <p class="card-text"><strong>Email:</strong> @Model.Email</p>
+            <p class="card-text"><strong>Phone:</strong> @(Model.PhoneNumber?? "N/A")</p>
+            <p class="card-text">
+                <strong>Address:</strong> @(string.IsNullOrEmpty(Model.Area) && string.IsNullOrEmpty(Model.StreetAddress)
+                ? "N/A"
+                : $"{Model.Area}, {Model.StreetAddress}")
+            </p>
+
+            <p class="card-text"><strong>Role:</strong> @Model.Role</p>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h4>Orders</h4>
+        @if (Model.Orders.Any())
+        {
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders)
+                    {
+                        <tr>
+                            <td>@order.OrderId</td>
+                            <td>@order.OrderDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("MM/dd/yyyy",new CultureInfo("en-QA"))</td>
+                            <td>@order.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No orders found.</p>
+        }
+    </div>
+
+    <div class="mt-4">
+        <h4>Payments</h4>
+        @if (Model.Payments.Any())
+        {
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Payment ID</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var payment in Model.Payments)
+                    {
+                        <tr>
+                            <td>@payment.Id</td>
+                            <td>@payment.Amount.ToString("C")</td>
+                            <td>@payment.PaymentDate.InZone(QatarDateTime.QatarZone).LocalDateTime.ToString("MM/dd/yyyy", new CultureInfo("en-QA"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No payments found.</p>
+        }
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>

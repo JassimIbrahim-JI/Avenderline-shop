@@ -1,0 +1,10 @@
+﻿@{
+    ViewData["Title"] = "Unsubscribed";
+    Layout = "~/Views/Shared/_LayoutAuth.cshtml";
+}
+
+<div class="container text-center mt-5">
+    <h2>You have been successfully unsubscribed.</h2>
+    <p>You will no longer receive newsletter emails from us.</p>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Return to Home</a>
+</div>

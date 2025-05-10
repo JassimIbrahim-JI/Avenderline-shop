@@ -1,0 +1,170 @@
+﻿@using LavenderLine.ViewModels.Carts
+@model IEnumerable<LavenderLine.ViewModels.Products.ProductViewModel>
+
+@{
+    ViewData["Title"] = "New Arrivals";
+    ViewBag.BodyClass = "";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var culture = new CultureInfo("en-QA");
+}
+
+<section class="shop-page">
+    <div class="container py-5 px-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    New Arrivals
+                </li>
+            </ol>
+        </nav>
+       
+
+        <div class="row">
+            <div class="col-md-3 filters">
+                <!-- Same filters as shop page -->
+                <div class="filter-group mb-3">
+                    <h5>Categories</h5>
+                    <div id="categoryFilters" class="py-3">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" id="categoryAll" name="category" value="all" checked>
+                            <label class="form-check-label" for="categoryAll">All Categories</label>
+                        </div>
+                        @foreach (var category in ViewBag.Categories)
+                        {
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" id="category@(category.Name)" name="category" value="@category.Name.ToLower()">
+                                <label class="form-check-label" for="category@(category.Name)">@category.Name</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="price-range-wrapper">
+                    <div id="priceSlider" style="width: 100%; max-width: 500px;"></div>
+                    <div class="price-range-boxes">
+                        <input type="text" id="minPrice" class="price-box" readonly>
+                        <input type="text" id="maxPrice" class="price-box" readonly>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="filter">
+                        <button id="filterButton" class="btn btn-primary" style="width: 50%">
+                            Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <!-- Same sorting controls as shop page -->
+                <!-- Filter Sorting Section -->
+                <div class="filter-sorting mb-5">
+                    <div class="d-flex flex-column flex-md-row gap-2 align-items-start align-items-md-center">
+                        <div class="d-flex flex-wrap gap-2" style="flex: 1;">
+                            <select class="form-select flex-shrink-0" id="sortBy" style="min-width: 180px;">
+                                <option value="default">Default Sorting</option>
+                                <option value="price-asc">Price: Low to High</option>
+                                <option value="price-desc">Price: High to Low</option>
+                            </select>
+
+                            <select class="form-select flex-shrink-0" id="showPerPage" style="min-width: 140px;">
+                                <option value="9">Show: 09</option>
+                                <option value="18">Show: 18</option>
+                                <option value="27">Show: 27</option>
+                            </select>
+                        </div>
+
+                        <p class="text-center text-md-end mb-0 mt-2 mt-md-0" style="flex-shrink: 0; font-size: 0.9rem;">
+                            Showing 01-09 Of @Model.Count() Products
+                        </p>
+                    </div>
+                </div>
+
+                @if (Model.Any())
+                {
+                    <!-- Same product grid as shop page -->
+                    <div class="row" id="productContainer">
+                        @foreach (var product in Model)
+                        {
+                            <div class="col-md-4 mb-4">
+                                <div class="product mx-2 p-0 mb-5">
+                                    <div class="product-image-container @(product.Quantity < 1 ? "sold-out" : "")">
+                                        <div class="shimmer-placeholder" aria-hidden="true"></div>
+                                        <img src=""
+                                             alt="Image of @product.Name"
+                                             class="img-fluid"
+                                             loading="lazy"
+                                             data-src="@product.ImageUrl"
+                                             width="400"
+                                             height="400">
+                                      
+                                            <div class="product-overlay">
+                                                @if(product.Quantity >= 1)
+                                            {
+                                            <button class="shop-btn"
+                                                        data-product-id="@product.ProductId"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#colorSizeModal-@product.ProductId">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                </button>
+                                                <a asp-controller="Home" asp-action="Details" asp-route-id="@product.ProductId" class="quick-view-button">
+                                                    <i class="fas fa-eye"></i> Quick View
+                                                </a>
+                                                
+                                            }
+                                        </div>
+
+                                        <div class="sold-out-label">Sold Out</div>
+
+                                    </div>
+                                       <label class="text-muted">@product.CategoryName</label>
+                                       <h3 class="product-name">@product.Name</h3>
+                                         <div class="product-price">
+                                        @if (product.IsOnSale)
+                                        {
+                                            <span class="text-muted text-decoration-line-through me-2">@product.OriginalPrice</span>
+                                        }
+
+                                        <span class="current-price fw-bold">QR @product.Price.ToString("N0", culture)</span>
+                                    </div>
+                                    <i class="far fa-heart favi-icon toggle-wishlist-btn" data-product-id="@product.ProductId" title="Add to Favorites"></i>
+                                </div>
+                            </div>
+                            <partial name="~/Views/Cart/_LengthSizeModal.cshtml" model="new ColorSizeModalViewModel {
+                                ProductId = product.ProductId,
+                                ProductName = product.Name,
+                                ImageUrl = product.ImageUrl,
+                                ProductPrice = product.Price,
+                                AvailableSizes = product.Sizes.Select(c=>c.Trim()).ToList(),
+                                AvailableLength = product.Lengths.Select(c=>c.Trim()).ToList(),
+                                MaxQuantity = product.Quantity,
+                            }" />
+                        }
+                    </div>
+                    <div class="load-more mt-5" id="loadMoreContainer">
+                        <button id="loadMore" class="btn btn-primary">Load More <i class="fas fa-arrow-down"></i></button>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                        <h4>No new arrivals found</h4>
+                        <p>Check back later for new products</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+<div id="modal-container"></div>
+
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="spinner-shop"></div>
+</div>
+
+@section Scripts {
+    <script src="~/js/shop.js" asp-append-version="true"></script>
+}
