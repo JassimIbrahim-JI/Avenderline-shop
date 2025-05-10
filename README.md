@@ -1,6 +1,6 @@
 # AvenderLine - Qatari Abaya E-Commerce Platform
 
-![AvenderLine Logo](./media/avenderline.png) 
+![AvenderLine Logo](AvenderLine/media/avenderline.png) 
 
 ## Project Overview
 A sophisticated e-commerce platform specializing in traditional Qatari abayas, built with ASP.NET MVC and modern web technologies. Designed to showcase cultural elegance while providing a seamless shopping experience.
